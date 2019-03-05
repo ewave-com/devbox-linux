@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+   rabbitmq:
+    image: "rabbitmq:3-management"
+    env_file: ./.env
+    container_name: ${PROJECT_NAME}_rabbitmq
+    restart: always    
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+#    volumes:
+#      - ./project/rabbitmq/rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
+    networks:
+      - devbox_network
+
+networks:
+   devbox_network:
+     external: true

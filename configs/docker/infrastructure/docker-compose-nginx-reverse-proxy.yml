@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+   nginx-reverse-proxy:
+     image: madebyewave/devbox-nginx-reverse-proxy
+     env_file: ./.env
+     container_name: nginx-reverse-proxy
+     restart: always
+     ports:
+       - "80:80"
+       - "443:443"
+     volumes:
+       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+       - ./nginx/logs:/var/log/nginx
+       - ./nginx/ssl:/etc/nginx/ssl
+     networks:
+       - devbox_network
+
+networks:
+   devbox_network:
+     external: true
+
+

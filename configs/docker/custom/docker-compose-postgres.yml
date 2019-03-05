@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    container_name: ${PROJECT_NAME}_postgres
+    env_file: ./.env
+    environment:
+      POSTGRES_PASSWORD: root
+    networks:
+      - devbox_network
+
+networks:
+   devbox_network:
+     external: true

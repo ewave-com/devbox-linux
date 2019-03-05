@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+   rabbitmq:
+    image: mongo:2.4.14
+    env_file: ./.env
+    container_name: ${PROJECT_NAME}_mongodb
+    restart: always    
+    mem_limit: 1024m
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+# Create manual folder       
+#    volumes:
+#       - ./project/mongodb:/data/db
+     networks:
+       - devbox_network
+
+networks:
+   devbox_network:
+     external: true

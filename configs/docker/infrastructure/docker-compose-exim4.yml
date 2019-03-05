@@ -1,0 +1,11 @@
+version: '2'
+services:
+  exim4:
+    build: ./exim4/
+    image: ewave/exim4
+    networks:
+     - devbox_network
+
+networks:
+   devbox_network:
+     external: true

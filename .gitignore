@@ -1,0 +1,9 @@
+*.retry
+projects/*
+!projects/info.txt
+configs/docker/infrastructure/nginx/
+configs/run
+/vendor/
+composer.lock
+
+.idea

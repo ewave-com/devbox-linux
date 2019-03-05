@@ -1,0 +1,4 @@
+DKIM_DOMAIN = ${lc:${domain:$h_from:}}
+DKIM_FILE = /etc/exim4/mail.${lc:${domain:$h_from:}}.key
+DKIM_PRIVATE_KEY = ${if exists{DKIM_FILE}{DKIM_FILE}{0}}
+DKIM_SELECTOR = mail

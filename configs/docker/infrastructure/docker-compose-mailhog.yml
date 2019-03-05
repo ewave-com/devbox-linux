@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+   mailhog:
+    image: madebyewave/mailhog
+    env_file: ./.env
+    container_name: mailer
+    restart: always    
+    ports:
+       - "${MAILHOG_PORT}:8025"
+    networks:
+       - devbox_network
+
+networks:
+   devbox_network:
+     external: true

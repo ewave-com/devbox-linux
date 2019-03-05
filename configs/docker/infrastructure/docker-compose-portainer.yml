@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+   portainer:
+     image: portainer/portainer
+     env_file: ./.env
+     container_name: portainer
+     restart: always
+     ports:
+       - "${PORTAINER_PORT}:9000"
+     volumes:
+       -  /var/run/docker.sock:/var/run/docker.sock
+     command: --no-auth -H unix:///var/run/docker.sock
+     networks:
+       - devbox_network
+networks:
+   devbox_network:
+     external: true
+
