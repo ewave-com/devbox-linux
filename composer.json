@@ -13,19 +13,19 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/madebyewave/tools-core.git"
+      "url": "https://github.com/ewave-com/devbox-tools-core.git"
     },
     {
       "type": "vcs",
-      "url": "https://github.com/madebyewave/tools-magento2.git"
+      "url": "https://github.com/ewave-com/devbox-tools-magento2.git"
     },
     {
       "type": "vcs",
-      "url": "https://github.com/madebyewave/tools-magento1.git"
+      "url": "https://github.com/ewave-com/devbox-tools-magento1.git"
     },
     {
       "type": "vcs",
-      "url": "https://github.com/madebyewave/tools-akeneo.git"
+      "url": "https://github.com/ewave-com/devbox-tools-akeneo.git"
     }
   ]
 }
