@@ -45,6 +45,7 @@ if [[ $1 = delete ]]; then
   rm -rf "$devbox_infra"/nginx/ssl/"$WEBSITE_HOST_NAME".conf >/dev/null 2>&1;
   rm -rf "$devbox_infra"/nginx/logs/"$WEBSITE_HOST_NAME"* >/dev/null 2>&1;
 fi
+sudo chown -R $USER:$USER "$devbox_infra"/nginx
 }
 
 ssl_on(){
