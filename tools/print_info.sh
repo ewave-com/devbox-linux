@@ -11,7 +11,7 @@ echo -e "$GREEN""Portainer URL $SET: http://127.0.0.1:9999"
 echo -e "-----------------------------------------------------------------------\n"
 
 echo -e "--------------------------$GREEN WEB $SET----------------------------------------"
-echo -e "$GREEN""Project name URL $SET: "$WEBSITE_PROTOCOL"://$PROJECT_NAME.local"
+echo -e "$GREEN""Project name URL $SET: "$WEBSITE_PROTOCOL"://$WEBSITE_HOST_NAME"
 echo -e "$GREEN""Web container $SET: ""$PROJECT_NAME""_web"
 
 if [[ $VARNISH_ENABLE = yes ]]; then
