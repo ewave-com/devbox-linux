@@ -10,7 +10,7 @@ source ./tools/web_platform.sh
 source ./tools/domain.sh
 source ./tools/restart_service.sh
 source ./tools/bash_alias.sh
-source ./tools/fix.sh
+source ./tools/fix_permissions.sh
 source ./tools/print_info.sh
 
 ssl_check(){
@@ -61,11 +61,15 @@ done
 }
 
 docker_architecture(){
-add_domain ; webserver_start ; auto_start_addimage ; sed_ip_port ; start_box 
+    add_domain ; webserver_start ; auto_start_addimage ; sed_ip_port ; start_box
 }
 
 run_devbox(){
-ssl_check ; docker_architecture ; sudo docker exec -it "$PROJECT_NAME"_"$CONTAINER_WEB_NAME" /bin/bash -c "/usr/bin/php $TOOLS_PROVIDER_REMOTE_PATH/$TOOLS_PROVIDER_ENTRYPOINT --autostart" 
+    ssl_check ; docker_architecture
+}
+
+run_platform_tools(){
+    sudo docker exec -it "$PROJECT_NAME"_"$CONTAINER_WEB_NAME" /bin/bash -c "/usr/bin/php $TOOLS_PROVIDER_REMOTE_PATH/$TOOLS_PROVIDER_ENTRYPOINT --autostart"
 }
 
 # Check and install docker
@@ -94,11 +98,11 @@ fix_permissions
 # Add Tools Alias
 addToolsAlias
 
-#final restart
-nginx_reverse_proxy_restart
-
 # Print project info
 print_info
+
+# Run platform tools
+run_platform_tools
 
 #Unset
 unset_env
