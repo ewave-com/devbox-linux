@@ -30,9 +30,9 @@ services:
      volumes:
        - ./configs/varnish/default.vcl:/etc/varnish/default.vcl
      environment:
-       - CACHE_SIZE 64m
-       - VARNISHD_PARAMS -p default_ttl=3600 -p default_grace=3600
-       - VCL_CONFIG /etc/varnish/conf.d/default.vcl
+       - "CACHE_SIZE 64m"
+       - "VARNISHD_PARAMS -p default_ttl=3600 -p default_grace=3600"
+       - "VCL_CONFIG /etc/varnish/conf.d/default.vcl"
      networks:
        - devbox_network
 
