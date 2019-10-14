@@ -30,7 +30,7 @@ fi
 # Check and install composer
 # If php composer don't install, script will setup depends.
 install_composer() {
-composer_isinstalled=$(dpkg -l | grep composer | grep ii | grep 'dependency manager for PHP')
+composer_isinstalled=$(which composer)
 if [ -z "$composer_isinstalled" ]; then
   sudo add-apt-repository -y ppa:ondrej/php
   sudo apt-get -qq update && sudo apt-get install -y composer

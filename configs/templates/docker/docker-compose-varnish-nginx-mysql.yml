@@ -6,6 +6,7 @@ services:
      container_name: ${PROJECT_NAME}_${CONTAINER_MYSQL_NAME}
      restart: always
      image: mysql:${CONTAINER_MYSQL_VERSION}
+     command: --default-authentication-plugin=mysql_native_password --innodb-use-native-aio=0
      ports:
        - "%mysql_port%:3306"
      environment:
@@ -28,10 +29,6 @@ services:
        - web:${WEBSITE_HOST_NAME}
      volumes:
        - ./configs/varnish/default.vcl:/etc/varnish/default.vcl
-     environment:
-       - CACHE_SIZE 64m
-       - VARNISHD_PARAMS -p default_ttl=3600 -p default_grace=3600
-       - VCL_CONFIG /etc/varnish/conf.d/default.vcl
      networks:
        - devbox_network
 
