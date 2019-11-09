@@ -1,7 +1,7 @@
 version: '2'
 services:
    es:
-    image: ${CONTAINER_ELASTIC_IMAGE}:${ELASTIC_VERSION}
+    image: ${CONTAINER_ELASTIC_IMAGE}:${CONTAINER_ELASTIC_VERSION}
     restart: always
     container_name: ${PROJECT_NAME}_${CONTAINER_ELASTIC_NAME}
     volumes:

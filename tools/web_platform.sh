@@ -3,7 +3,7 @@
 nginx_platform(){ 
 if [[ -z $CONFIGS_PROVIDER_NGINX ]]; then  
   cp -r ./configs/templates/nginx/default/website.conf.template ./projects/"$project_folder"/configs/nginxconf/$WEBSITE_HOST_NAME.conf
-  else  
+else
   cp -r ./configs/templates/nginx/"$CONFIGS_PROVIDER_NGINX"/website.conf.template ./projects/"$project_folder"/configs/nginxconf/$WEBSITE_HOST_NAME.conf
 fi
 # Add  another custom CONFIGS_PROVIDER_NGINX
@@ -34,7 +34,7 @@ if [[ $VARNISH_ENABLE = yes ]]; then
   cp -r ./configs/templates/docker/docker-compose-varnish-nginx-mysql.yml ./projects/"$project_folder"/docker-compose.yml
   #Run funtcion which check varnish template config
   varnish_platform
-  else
+else
   cp -r ./configs/templates/docker/docker-compose-nginx-mysql.yml ./projects/"$project_folder"/docker-compose.yml
 fi
 
@@ -46,8 +46,8 @@ fi
 # Action for enable redis platform.
 redis_platform(){
 if [[ $REDIS_ENABLE = yes ]]; then
-  cp -r ./configs/templates/docker/docker-redis-image.yml ./projects/"$project_folder"/docker-redis-image.yml
-  cd ./projects/"$project_folder"/  && sudo docker-compose --log-level "$docker_compose_log_level" -f docker-redis-image.yml up -d > /dev/null 2>&1 
+  cp -r ./configs/templates/docker/docker-compose-redis-image.yml ./projects/"$project_folder"/docker-compose-redis-image.yml
+  cd ./projects/"$project_folder"/  && sudo docker-compose --log-level "$docker_compose_log_level" -f docker-compose-redis-image.yml up -d
   cd "$devbox_root"
 fi
  }
@@ -55,8 +55,8 @@ fi
 # Action for enable elastic search platform.
 es_platform(){
 if [[ $ELASTIC_ENABLE = yes ]]; then
-  cp -r ./configs/templates/docker/docker-elastic-image.yml ./projects/"$project_folder"/docker-elastic-image.yml
-  cd ./projects/"$project_folder"/  && sudo docker-compose --log-level "$docker_compose_log_level" -f docker-elastic-image.yml up -d > /dev/null 2>&1 
+  cp -r ./configs/templates/docker/docker-compose-elastic-image.yml ./projects/"$project_folder"/docker-compose-elastic-image.yml
+  cd ./projects/"$project_folder"/  && sudo docker-compose --log-level "$docker_compose_log_level" -f docker-compose-elastic-image.yml up -d
   cd "$devbox_root"
 fi
 }

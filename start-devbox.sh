@@ -15,21 +15,21 @@ source ./tools/print_info.sh
 
 ssl_check(){
 if [[ -z $WEBSITE_PROTOCOL ]]; then  
-request_ssl
+  request_ssl
 else
   if [[ $WEBSITE_PROTOCOL = https ]]; then
-  prepare_env ; mysql_free ; ssh_free ; start_infrastructure ; ssl_on
+    prepare_env ; mysql_free ; ssh_free ; start_infrastructure ; ssl_on
   else
-  prepare_env ; mysql_free ; ssh_free ; start_infrastructure ; ssl_off
+    prepare_env ; mysql_free ; ssh_free ; start_infrastructure ; ssl_off
   fi
 fi
 }
 
 # Function  which add domain and sed variable
 add_domain()(
-prepare_add_domain
-nginx_platform
-php_platform
+  prepare_add_domain
+  nginx_platform
+  php_platform
 )
 
 auto_start_addimage()(

@@ -7,7 +7,7 @@ export devbox_root=$(pwd)
 devbox_infra="$devbox_root/configs/docker/infrastructure"
 #Server IP for XDEBUG
 server_ip=$(ip addr show docker0 | grep -Po 'inet \K[\d.]+')
-#Depricated 
+#Deprecated
 #Waiting https://github.com/docker/for-linux/issues/264
 #server_ip=172.17.0.1
 
@@ -52,7 +52,7 @@ fi
 }
 
 count_up_project_containers (){
-count_containers=$(sudo docker ps -a | grep "$PROJECT_NAME" | wc -l)
+count_containers=$(sudo docker ps -a | grep "${PROJECT_NAME}_" | wc -l)
 if [ $count_containers -ne 0  ]; then
   echo -e "$RED Containers form project "$PROJECT_NAME" is running now $SET"
   echo -e "$RED You cann't run already running containers $SET"
@@ -60,8 +60,6 @@ if [ $count_containers -ne 0  ]; then
   exit 0
 fi
 }
-
-
 
 stop_menu () {
 while :

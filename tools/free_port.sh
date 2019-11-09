@@ -1,7 +1,7 @@
 #!/bin/bash
 # Function which find free port for ssh service
 ssh_free() {
-    ssh_port=$(sudo netstat -tlnp | grep ':230' | awk '{print $4}' | tr -d ':' | sort -g -r | head -n 1);
+    ssh_port=$(sudo netstat -tlnp | grep ':230' | awk '{print $4}' | grep -v "::1:" | sed 's|'127.0.0.1'||g' | tr -d ':' | sort -g -r | head -n 1);
     if [[ -z "$ssh_port" ]]; then
         ssh_port=2300
     else
