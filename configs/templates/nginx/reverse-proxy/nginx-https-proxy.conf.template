@@ -4,6 +4,8 @@ server {
     return 301 https://$server_name$request_uri;
 }
 
+server_names_hash_bucket_size 256;
+
 server {
     listen 443 ssl;
     server_name %WEBSITE_HOST_NAME%;
@@ -26,6 +28,9 @@ server {
     location / {
       proxy_read_timeout 600;
       proxy_pass http://%PROJECT_NAME%_%CONTAINER_WEB_NAME%:80;
+      proxy_buffer_size          128k;
+      proxy_buffers              4 256k;
+      proxy_busy_buffers_size    256k;
 
       proxy_redirect off;
 
@@ -37,4 +42,3 @@ server {
 
     }
 }
-
