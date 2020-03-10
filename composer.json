@@ -6,14 +6,14 @@
     "ewave/devbox-core-scripts": "dev-master",
     "ewave/devbox-m2-scripts": "dev-master",
     "ewave/devbox-m1-scripts": "dev-master",
-    "ewave/devbox-akeneo-scripts": "dev-master"
+    "ewave/devbox-akeneo2-scripts": "dev-master"
   },
   "license": "OSL-3.0",
   "minimum-stability": "beta",
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/ewave-com/devbox-tools-core.git"
+      "url": "https://github.com/vasiliy-sam/devbox-tools-core.git"
     },
     {
       "type": "vcs",
@@ -25,7 +25,7 @@
     },
     {
       "type": "vcs",
-      "url": "https://github.com/ewave-com/devbox-tools-akeneo.git"
+      "url": "https://github.com/vasiliy-sam/devbox-tools-akeneo.git"
     }
   ]
 }
