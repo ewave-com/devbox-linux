@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #server_names_hash_bucket_size 256;
+=======
+server_names_hash_bucket_size 256;
+>>>>>>> fd0f1a6bc547c82da49cf8043a63736d66f9c858
 
 server {
     listen 80;
