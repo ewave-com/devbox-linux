@@ -4,7 +4,7 @@ services:
    redis:
     env_file: ./.env
     container_name: ${PROJECT_NAME}_${CONTAINER_REDIS_NAME}
-    image: redis
+    image: ${CONTAINER_REDIS_IMAGE}:${CONTAINER_REDIS_VERSION}
     restart: always
     networks:
       - devbox_network

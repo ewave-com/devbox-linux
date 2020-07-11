@@ -40,6 +40,7 @@ services:
        - ./configs/nginxconf:/etc/nginx/sites-enabled
        - ./configs/nginxlogs:/var/log/nginx
        - ./configs/cron:/var/spool/cron/crontabs
+       - ./configs/xdebug_profiles:/tmp/xdebug_profiles
      networks:
        - devbox_network
 

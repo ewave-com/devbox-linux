@@ -1,4 +1,4 @@
-server_names_hash_bucket_size 256;
+#server_names_hash_bucket_size 256;
 
 server {
     listen 80;
@@ -13,6 +13,8 @@ server {
       proxy_buffer_size          128k;
       proxy_buffers              4 256k;
       proxy_busy_buffers_size    256k;
+
+      client_max_body_size 500M;
 
       proxy_set_header      X-Real-IP $remote_addr;
       proxy_set_header      X-Forwarded-For $proxy_add_x_forwarded_for;
