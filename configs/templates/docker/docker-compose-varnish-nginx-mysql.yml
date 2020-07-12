@@ -40,14 +40,13 @@ services:
        - "%ssh_port%:22"
      restart: always
      volumes:
-       - ./public_html:${WEBSITE_DOCUMENT_ROOT}
+       - ./public_html:${PROJECT_SOURCE_ROOT}
        - .env:/var/www/docker-config/.env
        - .env-project.json:${PROJECT_CONFIGURATION_FILE}
        - ../../${TOOLS_PROVIDER}:${TOOLS_PROVIDER_REMOTE_PATH}
 #       - /home/www-data/.ssh:/var/www/.ssh
 #       - /home/www-data/.composer:/var/www/.composer
 #       - /home/www-data/.gitconfig:/var/www/.gitconfig
-#       - /home/www-data/.yarn:/var/www/.yarn
        - ./configs/php/xdebug.ini:/etc/php/${PHP_VERSION}/mods-available/xdebug.ini
        - ./configs/php/zzz-custom.ini:/etc/php/${PHP_VERSION}/mods-available/zzz-custom.ini
        - ./configs/node_modules:/var/www/node_modules_remote       
