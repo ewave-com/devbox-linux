@@ -23,6 +23,10 @@ server {
     ssl_prefer_server_ciphers on;
     ### SSL END ###
 
+    proxy_buffer_size          128k;
+    proxy_buffers              8 256k;
+    proxy_headers_hash_bucket_size 64;
+    
     location / {
       proxy_read_timeout 600;
       proxy_pass http://%PROJECT_NAME%_%CONTAINER_WEB_NAME%:80;
