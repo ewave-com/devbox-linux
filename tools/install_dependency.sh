@@ -7,7 +7,7 @@ if [ -z "$docker_isinstalled" ];then
   # Removing docker-engine if exists
   sudo apt-get -y remove docker docker-engine docker.io > /dev/null 2>&1
   # Install prerequisites to install docker
-  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common net-tools wget mc htop dstat openssl libnss3-tools jq > /dev/null 2>&1
+  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common net-tools wget mc htop dstat openssl libnss3-tools jq  net-tools > /dev/null 2>&1
   # Add repo docker CE
   sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /dev/null 2>&1
   # Install docker gpg key
