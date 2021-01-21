@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+    varnish:
+        image: {{CONTAINER_VARNISH_IMAGE}}:{{CONTAINER_VARNISH_VERSION}}
+        container_name: {{PROJECT_NAME}}_{{CONTAINER_VARNISH_NAME}}
+        restart: on-failure:5
+        volumes:
+            - ./configs/varnish/default.vcl:/etc/varnish/default.vcl
+        networks:
+            - docker_projectsubnetwork
+
+networks:
+    docker_projectsubnetwork:
+        external: true
+

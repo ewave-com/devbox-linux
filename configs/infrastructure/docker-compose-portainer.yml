@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+    portainer:
+        image: portainer/portainer
+        container_name: portainer
+        restart: on-failure:5
+        ports:
+            - "${PORTAINER_PORT}:9000"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        command: --no-auth -H unix:///var/run/docker.sock
+        networks:
+            - docker_projectsubnetwork
+
+networks:
+    docker_projectsubnetwork:
+        external: true

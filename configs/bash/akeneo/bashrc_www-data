@@ -1,0 +1,32 @@
+# Add bin to path
+export PATH="$PATH:/sbin:/usr/sbin:$HOME/bin"
+shopt -s checkwinsize
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
+
+# Custom prompt
+PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+# Add color
+eval `dircolors -b`
+
+# change initial directory to app dir by login
+cd {{WEBSITE_APPLICATION_ROOT}}
+
+# copy ssh keys from the shared ssh dir into .ssh and set required permissions
+if [[ -d "/var/www/share/ssh" ]]; then
+  mkdir -p /var/www/.ssh/ && cp -rf /var/www/share/ssh/* /var/www/.ssh/
+  sudo chmod 600 /var/www/.ssh/*
+  sudo chmod 777 --silent /var/www/.ssh/*.pub
+fi
+
+# add alias for devbox platform-tools utilities
+alias platform-tools="php {{TOOLS_PROVIDER_REMOTE_PATH}}/{{TOOLS_PROVIDER_ENTRYPOINT}}"
+
+#Akeneo aliases
+alias surights="platform-tools core:setup:permissions"
+alias cafull="rm -rf {{WEBSITE_APPLICATION_ROOT}}/var/cache/ && php {{WEBSITE_APPLICATION_ROOT}}/bin/console ca:cl -e prod && php {{WEBSITE_APPLICATION_ROOT}}/bin/console pim:installer:assets --symlink --clean -e prod && yarn run webpack && sudo service php{{PHP_VERSION}}-fpm reload"
+alias cadev="rm -rf{{WEBSITE_APPLICATION_ROOT}}/var/cache/ && php {{WEBSITE_APPLICATION_ROOT}}/bin/console ca:cl -e prod && php {{WEBSITE_APPLICATION_ROOT}}/bin/console pim:installer:assets --symlink --clean -e prod && yarn run webpack-dev && sudo service php{{PHP_VERSION}}-fpm reload"
+

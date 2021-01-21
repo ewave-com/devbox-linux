@@ -1,0 +1,23 @@
+version: "2"
+
+options:
+    project_root: config_path
+
+syncs:
+    {{PROJECT_NAME}}_{{CONTAINER_ELASTICSEARCH_NAME}}_data_sync:
+      src: '{{DEVBOX_PROJECT_DIR}}/sysdumps/es/data'
+      sync_strategy: 'native' # Linux specific, WinOs / MacOs specific have 'unison' strategy
+      sync_userid: 33 # for unison/rsync strategies
+      # See more unison options: https://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#prefs
+      sync_args:
+          # Prevent permissions updating
+          - "-perms=0"
+          - "-dontchmod=true"
+          # Params
+          - "-fastcheck=true"
+          - "-fastercheckUNSAFE=true"
+          - "-maxthreads=100"
+          - "-ignorelocks=true"
+          - "-numericids=false"
+          - "-confirmbigdel=false"
+#          - "-debug=verbose"

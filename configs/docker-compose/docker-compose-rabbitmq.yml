@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+    rabbitmq:
+        image: {{CONTAINER_RABBITMQ_IMAGE}}:{{CONTAINER_RABBITMQ_VERSION}}
+        container_name: {{PROJECT_NAME}}_{{CONTAINER_RABBITMQ_NAME}}
+        restart: on-failure:5
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        volumes:
+            - ./configs/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+        networks:
+            - docker_projectsubnetwork
+
+networks:
+    docker_projectsubnetwork:
+        external: true

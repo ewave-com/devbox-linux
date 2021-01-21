@@ -1,0 +1,50 @@
+version: "2"
+
+options:
+    project_root: config_path
+#    verbose: true
+    # comma-separated syncs list to show their logs
+    devbox_show_logs_for_syncs: {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync
+
+syncs:
+    {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync:
+        src: '{{DEVBOX_PROJECT_DIR}}/public_html'
+        sync_strategy: 'native' # Linux specific, WinOs / MacOs specific have 'unison' strategy
+        sync_userid: 33 # for unison/rsync strategies
+        # See more unison options: https://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#prefs
+        sync_args:
+            # Prevent permissions updating
+            - "-perms=0"
+            - "-dontchmod=true"
+            # Params
+            - "-fastcheck=true"
+            - "-fastercheckUNSAFE=true"
+            - "-maxthreads=100"
+            - "-ignorelocks=true"
+            - "-numericids=false"
+            - "-confirmbigdel=false"
+        sync_excludes_type: 'none' # set 'none' explicitly otherwise default type 'Name' will be passed to exclude patterns
+        sync_excludes:
+            - 'Path .git'
+            - 'Path .idea'
+            - 'Path .gitignore'
+            - 'Path .gitattributes'
+            - 'Path var/cache'
+            - 'Path var/composer_home'
+            - 'Path var/log'
+            - 'Path var/view_preprocessed'
+            - 'Path var/page_cache'
+            - 'Path var/session'
+            - 'Path node_modules'
+            - 'Path var/tmp'
+            - 'Path pub/static'
+            - 'Path dev/tests'
+            - 'Regex vendor/.*/Test/'
+            - 'Regex vendor/.*/tests/'
+            - 'Path vendor/magento/magento2-base/dev/tests'
+            - 'Path var/.setup_cronjob_status'
+            - 'Path var/.update_cronjob_status'
+    {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_composer_sync:
+        src: '{{DEVBOX_PROJECT_DIR}}/share/composer'
+        sync_strategy: 'native' # Linux specific, WinOs / MacOs specific have 'unison' strategy
+        sync_userid: 33 # for unison/rsync strategies

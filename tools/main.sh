@@ -1,82 +1,98 @@
-#!/bin/bash
-#DEBUG_MODE=$("> /dev/null 2>&1") 
-# List constants
-xdebug_port=9001
-docker_compose_log_level=ERROR
+#!/usr/bin/env bash
+
 export devbox_root=$(pwd)
-devbox_infra="$devbox_root/configs/docker/infrastructure"
-#Server IP for XDEBUG
-server_ip=$(ip addr show docker0 | grep -Po 'inet \K[\d.]+')
-#Deprecated
-#Waiting https://github.com/docker/for-linux/issues/264
-#server_ip=172.17.0.1
 
-# Set color variable
-DARKGRAY='\033[1;30m'
-RED='\033[0;31m'
-LIGHTRED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-LIGHTPURPLE='\033[1;35m'
-CYAN='\033[0;36m'
-WHITE='\033[1;37m'
-SET='\033[0m'
-#########################
+# import global variables
+require_once ${devbox_root}/tools/system/constants.sh
+# import output functions (print messages)
+require_once ${devbox_root}/tools/system/output.sh
+# import infrastructure functions
+require_once ${devbox_root}/tools/docker/infrastructure.sh
+# import main project functions entrypoint
+require_once ${devbox_root}/tools/project/project-main.sh
+# import common functions for all projects structure
+require_once ${devbox_root}/tools/project/all-projects.sh
+# import platform-tools functions
+require_once ${devbox_root}/tools/project/platform-tools.sh
+# import functions to show project information after start
+require_once ${devbox_root}/tools/print/print-project-info.sh
 
-# Function which find projects in folder
-list_projects(){
-echo "----------------------------------------------"
-echo -e " * * * * * * * $GREEN Select project $SET* * * * * * * * "
-echo "----------------------------------------------"
-PS3='Please input number  --->:'
-list="$(ls "./projects" | sed 's/ /£/'| grep -v ".txt") Exit"
-select project_folder in $list
-do
-  if [ "$project_folder" = "Exit" ] #if user selects Exit, then exit the program
-    then
-      exit 0
-    elif [ -n "$project_folder" ] #if name is valid, shows the files inside
-    then
-      break
-    else #if the number of the choice given by user is wrong, exit
-      echo "Invalid choice ($REPLY)!"
+############################ Public functions ############################
+
+start_devbox_project() {
+  local _selected_project=${1-""}
+
+  show_success_message ">> Starting DevBox project \"${_selected_project}\""
+
+  # initialize basic project variables and directories
+  init_selected_project "${_selected_project}"
+
+  if [[ "$(is_project_started ${_selected_project})" = "1" ]]; then
+    show_warning_message "Project \"${_selected_project}\" is already started."
+    show_warning_message "Please ensure selected project is correct, or stop it and try to start again."
+    exit 1
   fi
-done
 
-if [ ! -f  ./projects/"$project_folder"/.env ]; then
-  echo -e "$RED File .ENV not found! Please check! $SET"
-  exit 0
-fi
+  show_success_message ">> Preparing project .env file and variables"
+  # Prepare all required variables from .env
+  dotenv_prepare_project_variables "1"
+
+  show_success_message ">> Starting common infrastructure."
+  # Start common infra services, e.g. portainer, nginx-reverse-proxy, mailer, etc.
+  start_infrastructure
+
+  show_success_message ">> Preparing project configs and starting docker services"
+  # Prepare all required configs and start project services
+  start_project
+
+  show_success_message ">> Project \"${_selected_project}\" was successfully started"
+
+  # Print final project info
+  print_info
+
+  # Run platform tools menu inside web-container
+  run_platform_tools
+
+  # Unset all used variables
+  dotenv_unset_variables
 }
 
-count_up_project_containers (){
-count_containers=$(sudo docker ps -a | grep "${PROJECT_NAME}_" | wc -l)
-if [ $count_containers -ne 0  ]; then
-  echo -e "$RED Containers form project "$PROJECT_NAME" is running now $SET"
-  echo -e "$RED You cann't run already running containers $SET"
-  unset_env
-  exit 0
-fi
+stop_devbox_project() {
+  local _selected_project=${1-""}
+
+  if [[ "$(is_project_started ${_selected_project})" == "0" ]]; then
+      show_success_message ">> DevBox project \"${_selected_project}\" is already stopped"
+      return 0
+  fi
+
+  show_success_message ">> Stopping DevBox project \"${_selected_project}\""
+
+  show_success_message ">> Stopping docker services and cleaning up configs"
+
+  # initialize basic project variables and directories
+  init_selected_project "${_selected_project}"
+
+  stop_project
+
+  show_success_message ">> Project \"${_selected_project}\" was successfully stopped"
 }
 
-stop_menu () {
-while :
-  do
-  echo "----------------------------------------------"
-  echo -e " * * * * * * * * $GREEN Stop menu $SET * * * * * * * * * "
-  echo "----------------------------------------------"
-  echo "[1] Stop ONE project "
-  echo "[2] Stop ALL projects"
-  echo "[0] Exit/stop"
-  echo "----------------------------------------------"
-  echo -n "Enter your menu choice [1,2 or 0]:"
-  read point
-  case $point in
-    1) list_projects  ; set_env ; stop_project ; unset_env ;  break ;;
-    2) stop_all_projects ; break ;;
-    0) exit 0 ;;
-   esac
-done
+stop_devbox() {
+  show_success_message "> Stopping all DevBox projects"
+
+  # Stop all project containers
+  for selected_project in $(get_project_list "\n"); do
+    stop_devbox_project "${selected_project}"
+  done
+
+  show_success_message "> Stopping common infrastructure."
+  # Stop common infrastructure services images
+  down_infrastructure
+
+  show_success_message "> All DevBox projects were successfully stopped"
 }
+
+# todo implement or not?
+#kill_project() {}
+
+############################ Public functions end ############################

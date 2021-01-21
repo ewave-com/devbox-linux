@@ -8,6 +8,12 @@ if [ $(docker ps -aq | wc -l) -eq 0 ]; then
   exit 0
 fi
 
-
+echo "stopping containers..."
 docker stop $(docker ps -aq)
+
+echo "killing containers..."
 docker rm $(docker ps -aq)
+
+#echo clearing nginx configs
+# copied from win devbox, todo update to linux version
+#RMDIR /S /Q \..\..\configs\nginx-reversproxy\run
