@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+    db:
+        image: {{CONTAINER_MYSQL_IMAGE}}:{{CONTAINER_MYSQL_VERSION}}
+        container_name: {{PROJECT_NAME}}_{{CONTAINER_MYSQL_NAME}}
+        restart: on-failure:5
+        command: --default-authentication-plugin=mysql_native_password --innodb-use-native-aio=0
+        ports:
+            - "{{CONTAINER_MYSQL_PORT}}:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD={{CONTAINER_MYSQL_ROOT_PASS}}
+            - MYSQL_DATABASE={{CONTAINER_MYSQL_DB_NAME}}
+        volumes:
+            - {{PROJECT_NAME}}_{{CONTAINER_MYSQL_NAME}}_data_sync:/var/lib/mysql # WinOs / MacOs specific
+            - ./configs/mysql/conf.d/custom.cnf:/etc/mysql/conf.d/custom.cnf
+        networks:
+            - docker_projectsubnetwork
+
+volumes:
+    {{PROJECT_NAME}}_{{CONTAINER_MYSQL_NAME}}_data_sync:
+        external: true
+
+networks:
+    docker_projectsubnetwork:
+        external: true

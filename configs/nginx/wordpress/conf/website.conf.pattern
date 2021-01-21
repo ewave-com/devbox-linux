@@ -1,0 +1,52 @@
+upstream fastcgi_backend {
+    server unix:/var/run/php7-fpm.sock;
+}
+
+server {
+    listen      80;
+    server_name {{WEBSITE_HOST_NAME}} {{website_extra_host_names_nginx_list}};
+    root        {{WEBSITE_APPLICATION_ROOT}}/;
+    index       index.php index.html index.htm;
+
+    access_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-access.log;
+    error_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-error.log;
+    
+    location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+
+    location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+        
+        if (!-e $request_filename)
+        {
+            rewrite ^(.+)$ /index.php?q=$1 last;
+        }
+
+        location ~* ^.+\.(jpeg|jpg|png|gif|bmp|ico|svg|css|js)$ {
+            expires     max;
+        }
+
+        location ~ [^/]\.php(/|$) {
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            if (!-f $document_root$fastcgi_script_name) {
+                return  404;
+            }
+
+            fastcgi_pass    fastcgi_backend;
+            fastcgi_index   index.php;
+            include         /etc/nginx/fastcgi_params;
+        }
+    }
+    location ~* "/\.(htaccess|htpasswd)$" {
+        deny    all;
+        return  404;
+    }
+}

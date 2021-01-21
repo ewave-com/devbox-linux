@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+    web:
+        image: {{CONTAINER_WEB_IMAGE}}:{{CONTAINER_WEB_VERSION}}
+        container_name: {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}
+        restart: unless-stopped
+        ports:
+            - "{{CONTAINER_WEB_SSH_PORT}}:22"
+        volumes:
+            - {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync:{{WEBSITE_SOURCES_ROOT}}
+            - {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_composer_cache_sync:/var/www/.composer
+            - {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_node_modules_sync:/var/www/node_modules_remote
+            - ./../.env-project.json:{{PROJECT_CONFIGURATION_FILE}}
+            - ./../share:{{WEBSITE_SHARE_DIR}}
+            - .env:/var/www/docker-config/.env
+            - ./configs/nginx/conf.d:/etc/nginx/conf.d
+            - ./configs/bash/bashrc_www-data:/var/www/.bashrc
+            - ./configs/bash/bashrc_root:/root/.bashrc
+            - ./bash_history_web:/var/www/.bash_history
+            - ./configs/ssl:/etc/nginx/ssl
+            - ./configs/nginx/logs:/var/log/nginx
+            - ./configs/php/ini/xdebug.ini:/etc/php/{{PHP_VERSION}}/mods-available/xdebug.ini
+            - ./configs/php/ini/xdebug.ini:/etc/php/{{PHP_VERSION}}/cli/conf.d/20-xdebug.ini
+            - ./configs/php/ini/zzz-custom.ini:/etc/php/{{PHP_VERSION}}/mods-available/zzz-custom.ini
+            - ./configs/cron:/var/spool/cron/crontabs
+            - ./../../../{{TOOLS_PROVIDER}}:{{TOOLS_PROVIDER_REMOTE_PATH}}
+        networks:
+            - docker_projectsubnetwork
+
+volumes:
+    {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync:
+        external: true
+    {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_composer_cache_sync:
+        external: true
+    {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_node_modules_sync:
+        external: true
+
+networks:
+    docker_projectsubnetwork:
+        external: true

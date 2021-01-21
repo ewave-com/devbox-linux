@@ -1,0 +1,45 @@
+upstream fastcgi_backend {
+    server unix:/var/run/php7-fpm.sock;
+}
+
+server {
+    listen               80;
+    server_name          {{WEBSITE_HOST_NAME}} {{website_extra_host_names_nginx_list}};
+
+    index                app.php;
+
+    root                 {{WEBSITE_APPLICATION_ROOT}}/web;
+    access_log           /var/log/nginx/{{WEBSITE_HOST_NAME}}-access.log;
+    error_log            /var/log/nginx/{{WEBSITE_HOST_NAME}}-error.log;
+
+    client_max_body_size 500M;
+
+    fastcgi_buffer_size  128k;
+    fastcgi_buffers      8 256k;
+
+    location / {
+        index     app.php;
+        autoindex on;
+        try_files $uri $uri/ @handler;
+        expires   30d;
+    }
+
+    location @handler {
+        rewrite / /app.php;
+    }
+
+    location ~ .php/ {
+        rewrite ^(.*.php)/ $1 last;
+    }
+
+    location ~ .php$ {
+        expires              off;
+        fastcgi_read_timeout 600s;
+        fastcgi_pass         fastcgi_backend;
+        fastcgi_param        SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        fastcgi_param        SCRIPT_FILENAME  $request_filename;
+        fastcgi_index        app.php;
+        include              fastcgi_params;
+    }
+}
+

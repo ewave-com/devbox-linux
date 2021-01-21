@@ -2,6 +2,7 @@
   "name": "ewave/devbox-environment",
   "description": "Tools to setup and install required containers",
   "type": "project",
+  "version": "3.0.0",
   "require": {
     "ewave/devbox-core-scripts": "dev-master",
     "ewave/devbox-m2-scripts": "dev-master",

@@ -1,0 +1,45 @@
+# Add bin to path
+export PATH="$PATH:/sbin:/usr/sbin:$HOME/bin"
+shopt -s checkwinsize
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
+
+# Custom prompt
+PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+# Add color
+eval `dircolors -b`
+
+# change initial directory to app dir by login
+cd {{WEBSITE_APPLICATION_ROOT}}
+
+# copy ssh keys from the shared ssh dir into .ssh and set required permissions
+if [[ -d "{{WEBSITE_SHARE_DIR}}/ssh" ]]; then
+  mkdir -p /var/www/.ssh/ && cp -rf {{WEBSITE_SHARE_DIR}}/ssh/* /var/www/.ssh/
+  sudo chmod 600 /var/www/.ssh/*
+  sudo chmod 777 --silent /var/www/.ssh/*.pub
+fi
+
+# copy composer keys from the shared composer dir into .composer and set required permissions
+if [[ -d "{{WEBSITE_SHARE_DIR}}/composer" ]]; then
+  composer_home="$(composer config --global home --no-plugins)" && mkdir -p "${composer_home}" && cp -rf {{WEBSITE_SHARE_DIR}}/composer/* "${composer_home}/"
+fi
+
+# downgrade composer from v2 to v1 in case at least one dependency like '"composer-plugin-api": "^1.1"' is found in application composer.lock
+if [[ -n $(grep -E '\"composer-plugin-api\"\:\ \"[^~]?1\..*\"' "{{WEBSITE_APPLICATION_ROOT}}/composer.lock") && -z "$(composer --version | grep 'Composer version 1.')" ]]; then
+  sudo composer self-update --1 > /dev/null 2>&1
+fi
+
+# add alias for devbox platform-tools utilities
+alias platform-tools="php {{TOOLS_PROVIDER_REMOTE_PATH}}/{{TOOLS_PROVIDER_ENTRYPOINT}}"
+
+# node modules are synced separately and then symlinked because of directory number of files
+if [[ -n "{{CONFIGS_PROVIDER_NODE_MODULES_DOCKER_SYNC}}" ]]; then
+  mkdir -p /var/www/node_modules_remote
+  ln -nsf /var/www/node_modules_remote {{WEBSITE_APPLICATION_ROOT}}/node_modules
+fi
+
+# Common application aliases
+alias coperm="platform-tools core:setup:permissions"
