@@ -1,7 +1,7 @@
 #!/bin/bash
 # Function which find free port for ssh service
 ssh_free() {
-    ssh_port=$(sudo netstat -tlnp | grep ':230' | awk '{print $4}' | tr -d ':' | sort -g -r | head -n 1);
+    ssh_port=$(sudo netstat -tlnp | grep ':230' | awk '{print $4}' | awk -F ":" '{print $NF}' | sort -g -r | head -n 1);
     if [[ -z "$ssh_port" ]]; then
         ssh_port=2300
     else
@@ -12,7 +12,7 @@ ssh_free() {
 # Function which find free port for mysql service
 mysql_free() {
 if [[ -z "$CONTAINER_MYSQL_PORT" ]]; then
-    mysql_port=$(sudo netstat -tlnp | grep ':::340' | awk '{print $4}' | tr -d ':' | sort -g -r | head -n 1);
+    mysql_port=$(sudo netstat -tlnp | grep ':::340' | awk '{print $4}' | awk -F ":" '{print $NF}' | sort -g -r | head -n 1);
     if [[ -z "$mysql_port" ]]; then
         mysql_port=3400
     else
@@ -24,7 +24,7 @@ fi
 
 #Check filled port from .env if it's free
 if [[ ! -z "$CONTAINER_MYSQL_PORT" ]]; then
-    mysql_current=$(sudo netstat -tlnp | grep "$CONTAINER_MYSQL_PORT" | awk '{print $4}' | tr -d ':' | sort -g -r | head -n 1);
+    mysql_current=$(sudo netstat -tlnp | grep "$CONTAINER_MYSQL_PORT" | awk '{print $4}' | awk -F ":" '{print $NF}' | sort -g -r | head -n 1);
     if [[ $CONTAINER_MYSQL_PORT=$mysql_current ]]; then
         if [[ ! -z $mysql_current ]]; then
             echo -e "$RED Current MYSQL port $CONTAINER_MYSQL_PORT is using $SET"
