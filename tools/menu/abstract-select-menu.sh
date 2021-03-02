@@ -63,9 +63,9 @@ function select_menu_item() {
     # Allow typing numeric index of selection
     if [[ ${keycode} =~ ^[0-9]+$ ]]; then
       if [[ "${cursor}" != "0" && "${_options[${cursor}${keycode}]+x}" == "x" ]]; then
-        cursor=${keycode}
-      elif [[ "${_options[${keycode}]+x}" == "x" ]]; then
         cursor=${cursor}${keycode}
+      elif [[ "${_options[${keycode}]+x}" == "x" ]]; then
+        cursor=${keycode}
       fi
     else
       # catch multi-char special key sequences

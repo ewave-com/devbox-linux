@@ -27,7 +27,7 @@ function docker_compose_up() {
     _env_file_option="--env-file ${_env_filepath}"
   fi
 
-  sudo docker-compose \
+  docker-compose \
     --file "${_compose_filepath}" \
     ${_env_file_option} \
     --log-level "${docker_compose_log_level}" \
@@ -62,7 +62,7 @@ function docker_compose_stop() {
     _env_file_option="--env-file ${_env_filepath}"
   fi
 
-  sudo docker-compose \
+  docker-compose \
     --file "${_compose_filepath}" \
     ${_env_file_option} \
     --log-level "${docker_compose_log_level}" \
@@ -97,7 +97,7 @@ function docker_compose_down() {
     _env_file_option="--env-file ${_env_filepath}"
   fi
 
-  sudo docker-compose \
+  docker-compose \
     --file "${_compose_filepath}" \
     ${_env_file_option} \
     --log-level "${docker_compose_log_level}" \
@@ -132,7 +132,7 @@ function docker_compose_down_and_clean() {
     _env_file_option="--env-file ${_env_filepath}"
   fi
 
-  sudo docker-compose \
+  docker-compose \
     --file "${_compose_filepath}" \
     ${_env_file_option} \
     --log-level "${docker_compose_log_level}" \

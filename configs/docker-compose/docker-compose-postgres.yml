@@ -4,7 +4,7 @@ services:
     db:
         image: {{CONTAINER_POSTGRES_IMAGE}}:{{CONTAINER_POSTGRES_VERSION}}
         container_name: {{PROJECT_NAME}}_{{CONTAINER_POSTGRES_NAME}}
-        restart: on-failure:5
+        restart: unless-stopped
         environment:
             - POSTGRES_PASSWORD=root
         networks:

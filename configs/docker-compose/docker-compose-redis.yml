@@ -4,7 +4,7 @@ services:
     redis:
         image: {{CONTAINER_REDIS_IMAGE}}:{{CONTAINER_REDIS_VERSION}}
         container_name: {{PROJECT_NAME}}_{{CONTAINER_REDIS_NAME}}
-        restart: on-failure:5
+        restart: unless-stopped
         networks:
             - docker_projectsubnetwork
 

@@ -15,6 +15,11 @@ eval `dircolors -b`
 # change initial directory to app dir by login
 cd {{WEBSITE_APPLICATION_ROOT}}
 
+# allow access to common share directory
+if [[ -d "{{WEBSITE_SHARE_DIR}}" && "$(stat -c '%U' {{WEBSITE_SHARE_DIR}})" != "${USER}" ]];then
+  sudo chown -R $USER:$(id -gn) {{WEBSITE_SHARE_DIR}}
+fi
+
 # copy ssh keys from the shared ssh dir into .ssh and set required permissions
 if [[ -d "{{WEBSITE_SHARE_DIR}}/ssh" ]]; then
   mkdir -p /var/www/.ssh/ && cp -rf /{{WEBSITE_SHARE_DIR}}/ssh/* /var/www/.ssh/
@@ -24,7 +29,12 @@ fi
 
 # copy composer keys from the shared composer dir into .composer and set required permissions
 if [[ -d "{{WEBSITE_SHARE_DIR}}/composer" ]]; then
-  composer_home="$(composer config --global home --no-plugins)" && mkdir -p "${composer_home}" && cp -rf {{WEBSITE_SHARE_DIR}}/composer/* "${composer_home}/"
+  composer_home="${HOME}/.composer"
+  if [[ ! -d "${composer_home}" ]]; then
+    sudo -su $USER mkdir -p "${composer_home}" && chown -R $USER:$(id -gn) ${composer_home}
+  fi
+
+  cp -rf {{WEBSITE_SHARE_DIR}}/composer/* "${composer_home}/"
 fi
 
 # add alias for devbox platform-tools utilities
@@ -37,8 +47,10 @@ if [[ -n "{{CONFIGS_PROVIDER_NODE_MODULES_DOCKER_SYNC}}" ]]; then
 fi
 
 # downgrade composer from v2 to v1 in case at least one dependency like '"composer-plugin-api": "^1.1"' is found in application composer.lock
-if [[ -n $(grep -E '\"composer-plugin-api\"\:\ \"[^~]?1\..*\"' "{{WEBSITE_APPLICATION_ROOT}}/composer.lock") && -z "$(composer --version | grep 'Composer version 1.')" ]]; then
-  sudo composer self-update --1 > /dev/null 2>&1
+if [[ -f "{{WEBSITE_APPLICATION_ROOT}}/composer.lock" ]]; then
+  if [[ -n $(grep -E '\"composer-plugin-api\"\:\ \"[^~]?1\..*\"' "{{WEBSITE_APPLICATION_ROOT}}/composer.lock") && -z "$(composer --version | grep 'Composer version 1.')" ]]; then
+    sudo composer self-update --1 > /dev/null 2>&1
+  fi
 fi
 
 # Common application aliases

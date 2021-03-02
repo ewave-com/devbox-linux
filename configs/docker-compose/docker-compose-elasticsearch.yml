@@ -4,7 +4,7 @@ services:
     es:
         image: {{CONTAINER_ELASTICSEARCH_IMAGE}}:{{CONTAINER_ELASTICSEARCH_VERSION}}
         container_name: {{PROJECT_NAME}}_{{CONTAINER_ELASTICSEARCH_NAME}}
-        restart: on-failure:5
+        restart: unless-stopped
         ports:
             - "{{CONTAINER_ELASTICSEARCH_PORT}}:9200"
         environment:

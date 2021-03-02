@@ -4,7 +4,7 @@ services:
     rabbitmq:
         image: {{CONTAINER_RABBITMQ_IMAGE}}:{{CONTAINER_RABBITMQ_VERSION}}
         container_name: {{PROJECT_NAME}}_{{CONTAINER_RABBITMQ_NAME}}
-        restart: on-failure:5
+        restart: unless-stopped
         ports:
             - "15672:15672"
             - "5672:5672"

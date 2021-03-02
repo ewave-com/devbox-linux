@@ -35,6 +35,8 @@ function start_project() {
   [[ -z "${WEBSITE_EXTRA_HOST_NAMES}" ]] && domains="${WEBSITE_HOST_NAME}" || domains="${WEBSITE_HOST_NAME},${WEBSITE_EXTRA_HOST_NAMES}"
   add_website_domain_to_hosts "${domains}"
 
+  rm -f "${project_up_dir}/project-stopped.flag"
+
   # Fix for reload network,because devbox-network contains all containers
   sleep 5
   show_success_message "Restarting nginx-reverse-proxy" "2"
@@ -67,6 +69,8 @@ function stop_current_project() {
   show_success_message "Removing domains from hosts file" "2"
   [[ -z "${WEBSITE_EXTRA_HOST_NAMES+x}" ]] && domains="${WEBSITE_HOST_NAME}" || domains="${WEBSITE_HOST_NAME},${WEBSITE_EXTRA_HOST_NAMES}"
   delete_website_domain_from_hosts "${domains}"
+
+  touch "${project_up_dir}/project-stopped.flag"
 
   dotenv_unset_variables "${project_up_dir}/.env"
 
@@ -168,7 +172,7 @@ function create_base_project_dirs() {
   fi
 
   if [[ ${ELASTICSEARCH_ENABLE} == yes ]]; then
-    mkdir -p "${project_dir}/sysdumps/elasticsearch"
+    mkdir -p "${project_dir}/sysdumps/elasticsearch/data"
   fi
 
   # backward compatibility ont-time moves, will be removed later

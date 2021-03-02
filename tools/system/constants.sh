@@ -12,6 +12,8 @@ export host_user_group=$(id -g -n)
 
 export docker_compose_log_level=ERROR
 
+export composer_autoupdate="1"
+
 function get_os_type() {
   local _os_type
 

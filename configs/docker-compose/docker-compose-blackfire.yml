@@ -4,7 +4,7 @@ services:
     blackfire:
         image: {{CONTAINER_BLACKFIRE_IMAGE}}:{{CONTAINER_BLACKFIRE_VERSION}}
         container_name: {{PROJECT_NAME}}_{{CONTAINER_BLACKFIRE_NAME}}
-        restart: always
+        restart: unless-stopped
         environment:
             - BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID_T}
             - BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN_T}

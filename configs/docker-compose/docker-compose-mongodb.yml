@@ -4,7 +4,7 @@ services:
     mongodb:
         image: {{CONTAINER_MONGODB_IMAGE}}:{{CONTAINER_MONGODB_VERSION}}
         container_name: {{PROJECT_NAME}}_{{CONTAINER_MONGODB_NAME}}
-        restart: on-failure:5
+        restart: unless-stopped
         mem_limit: 1024m
         environment:
             - MONGO_DATA_DIR=/data/db

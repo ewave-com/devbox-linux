@@ -75,9 +75,9 @@ function rm_container_by_name() {
 }
 
 function destroy_all_docker_services() {
-  docker stop $(docker ps -q)
-  docker kill $(docker ps -q)
-  docker rm $(docker ps -aq)
+  [[ -n $(docker ps -q) ]] && docker stop $(docker ps -q)
+  [[ -n $(docker ps -q) ]] && docker kill $(docker ps -q)
+  [[ -n $(docker ps -aq) ]] && docker rm $(docker ps -aq)
   docker volume prune --force
   docker system prune --force
 }

@@ -4,7 +4,7 @@ services:
     db:
         image: {{CONTAINER_MYSQL_IMAGE}}:{{CONTAINER_MYSQL_VERSION}}
         container_name: {{PROJECT_NAME}}_{{CONTAINER_MYSQL_NAME}}
-        restart: on-failure:5
+        restart: unless-stopped
         command: --default-authentication-plugin=mysql_native_password --innodb-use-native-aio=0
         ports:
             - "{{CONTAINER_MYSQL_PORT}}:3306"

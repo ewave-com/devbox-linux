@@ -22,6 +22,8 @@ function get_project_list() {
 # 1 - true, 0 - false
 function is_project_started() {
   local _selected_project=${1-''}
+  local _fast_check=${2-'0'}
+
   if [ -z "${_selected_project}" ]; then
     show_error_message "Unable to check if project is started. Project name cannot be empty."
     exit 1
@@ -40,12 +42,17 @@ function is_project_started() {
     return
   fi
 
+  if [[ -f "${_project_up_dir}/project-stopped.flag" ]]; then
+    echo "0"
+    return
+  fi
+
   local _dotenv_project_name
   _dotenv_project_name=$(dotenv_get_param_value 'PROJECT_NAME' "${_project_dir}/.env")
   local _has_main_dotenv_file
   _has_main_dotenv_file=$([[ -f "${_project_up_dir}/.env" ]] && echo "1" || echo "0")
   local _has_project_running_containers
-  _has_project_running_containers=$(is_docker_container_running "${_dotenv_project_name}_")
+  _has_project_running_containers=$([[ "${_fast_check}" == "0" ]] && echo $(is_docker_container_running "${_dotenv_project_name}_") || echo "1")
   local _docker_files_count
   _docker_files_count=$(find "${_project_up_dir}" -mindepth 1 -maxdepth 1 -name "docker-*.yml" | awk '{print length}')
   local _config_dirs_count

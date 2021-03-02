@@ -68,6 +68,8 @@ function cleanup_project_docker_up_configs() {
   rm -rf "${project_up_dir}/docker-sync/"
 
   rm -rf "${project_up_dir}/nginx-reverse-proxy/"
+
+  rm -f "${project_up_dir}/project-stopped.flag"
 }
 
 ############################ Public functions end ############################

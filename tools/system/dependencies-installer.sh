@@ -68,7 +68,7 @@ function install_docker() {
 
 function install_docker_sync() {
   if [[ -z "$(which ruby)" || -z "$(which gem)" ]]; then
-    sudo apt-get install -y ruby >/dev/null
+    sudo apt-get install -y ruby ruby-dev >/dev/null
   fi
 
   if [[ -z "$(which docker-sync)" ]]; then
@@ -103,11 +103,18 @@ function install_composer() {
     run_composer_installer
   fi
 
-  # locally catch the possible composer error without application stopping
-  set +e && _composer_install_output=$(composer install --quiet) && set -e
+  local _composer_output=''
+  if [[ ! -f "${devbox_root}/composer.lock" ]]; then
+    show_success_message "Running initial composer install command."
+    # locally catch the possible composer error without application stopping
+    set +e && _composer_output=$(composer install --quiet) && set -e
+  elif [[ "${composer_autoupdate}" == "1" && -n $(find "${devbox_root}/composer.lock" -mmin +604800) ]]; then
+    show_success_message "Running composer update command to refresh packages. Last run is a week ago. Please wait a few seconds"
+    set +e && _composer_output=$(composer update --quiet) && set -e
+  fi
 
-  if [[ $(echo ${_composer_install_output} | grep "Fatal error") ]]; then
-    # PHP 8.0+ Compatibility fix, the following error or similar might occur during 'composer install' command.
+  if [[ $(echo ${_composer_output} | grep "Fatal error") ]]; then
+    # PHP 8.0+ Compatibility fix, the following error or similar might occur during composer command.
     # PHP Fatal error:  Uncaught ArgumentCountError: array_merge() does not accept unknown named parameters in /usr/share/php/Composer/DependencyResolver/DefaultPolicy.php:84
     # "composer selfupdate" is errored as well. So we need to completely reinstall composer.
     show_warning_message "An error occurred during \"composer install\" operation."
@@ -128,9 +135,9 @@ function register_devbox_scripts_globally() {
   sudo chmod ug+x "${devbox_root}/down-devbox.sh"
   sudo chmod ug+x "${devbox_root}/sync-actions.sh"
 
-  if [[ -z $(echo "${PATH}" | grep "${devbox_root}" ) ]]; then
-    echo -en '\n' >> ~/.bashrc
-    echo "export PATH='${PATH}:${devbox_root}'" >> ~/.bashrc
+  if [[ -z $(echo "${PATH}" | grep "${devbox_root}") ]]; then
+    echo -en '\n' >>~/.bashrc
+    echo "export PATH='${PATH}:${devbox_root}'" >>~/.bashrc
 
     export PATH="${PATH}:${devbox_root}"
   fi
