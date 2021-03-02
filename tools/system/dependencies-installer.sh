@@ -9,6 +9,7 @@ function install_dependencies() {
   install_docker
   install_docker_sync
   #install_unison # not needed because of native sync
+  install_git
   install_composer
   install_extra_packages
   register_devbox_scripts_globally
@@ -79,6 +80,12 @@ function install_docker_sync() {
   fi
 }
 
+function install_git() {
+  if [[ -z "$(which git)" ]]; then
+    sudo apt-get install -y git >/dev/null
+  fi
+}
+
 # Check and install composer
 function install_composer() {
   run_composer_installer() {
@@ -107,10 +114,10 @@ function install_composer() {
   if [[ ! -f "${devbox_root}/composer.lock" ]]; then
     show_success_message "Running initial composer install command."
     # locally catch the possible composer error without application stopping
-    set +e && _composer_output=$(composer install --quiet) && set -e
+    set +e && _composer_output=$(COMPOSER="${devbox_root}/composer.json" composer install --quiet) && set -e
   elif [[ "${composer_autoupdate}" == "1" && -n $(find "${devbox_root}/composer.lock" -mmin +604800) ]]; then
     show_success_message "Running composer update command to refresh packages. Last run is a week ago. Please wait a few seconds"
-    set +e && _composer_output=$(composer update --quiet) && set -e
+    set +e && _composer_output=$(COMPOSER="${devbox_root}/composer.json" composer update --quiet) && set -e
   fi
 
   if [[ $(echo ${_composer_output} | grep "Fatal error") ]]; then
