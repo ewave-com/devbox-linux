@@ -23,6 +23,6 @@ syncs:
         sync_excludes_type: 'none'      # set 'none' explicitly otherwise default type 'Name' will be passed to sync_exclude patterns
         sync_excludes:
             - 'Path .idea'
-            - 'Path var/cache'
-            - 'Path var/logs'
-#            - 'Path node_modules'      # sync node_modules together with public_html as Akeneo can not follow node_modules_remote symlink
+            - 'Path {{APP_REL_PATH}}var/cache'
+            - 'Path {{APP_REL_PATH}}var/logs'
+#            - 'Path {{NODE_MODULES_REL_PATH}}node_modules'      # sync node_modules together with public_html as Akeneo can not follow node_modules_remote symlink

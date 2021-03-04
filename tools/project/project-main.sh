@@ -41,6 +41,11 @@ function start_project() {
   sleep 5
   show_success_message "Restarting nginx-reverse-proxy" "2"
   nginx_reverse_proxy_restart
+
+  if [[ "${os_type}" == "linux" ]]; then
+    show_success_message "Expanding web container permissions" "2"
+    fix_web_container_permissions
+  fi
 }
 
 function stop_current_project() {
@@ -148,8 +153,19 @@ function create_base_project_dirs() {
   mkdir -p "${project_up_dir}"
 
   mkdir -p "${project_dir}/public_html/" && sudo chmod -R 777 "${project_dir}/public_html"
+  if [[ "${os_type}" == "linux" && -z $(getfacl --absolute-names "${project_dir}/public_html" | grep "default:other::rw") ]]; then
+    sudo setfacl --default --recursive -m u::rwx,g::rwx,o:rwx "${project_dir}/public_html"
+  fi
+
   mkdir -p "${project_dir}/share/" && sudo chmod -R 777 "${project_dir}/share"
+  if [[ "${os_type}" == "linux" && -z $(getfacl --absolute-names "${project_dir}/share" | grep "default:other::rw") ]]; then
+    sudo setfacl --default --recursive -m u::rwx,g::rwx,o:rwx "${project_dir}/share"
+  fi
+
   mkdir -p "${project_dir}/sysdumps/" && sudo chmod -R 777 "${project_dir}/sysdumps"
+  if [[ "${os_type}" == "linux" && -z $(getfacl --absolute-names "${project_dir}/sysdumps" | grep "default:other::rw") ]]; then
+    sudo setfacl --default --recursive -m u::rwx,g::rwx,o:rwx "${project_dir}/sysdumps"
+  fi
 
   mkdir -p "${project_dir}/share/composer"
   if [[ ! -f "${project_dir}/share/composer/readme.txt" ]]; then
@@ -165,7 +181,11 @@ function create_base_project_dirs() {
 
   mkdir -p "${project_dir}/sysdumps/node_modules/"
 
-  mkdir -p "${project_dir}/sysdumps/composer/"
+  if [[ -n "${COMPOSER_CACHE_DIR}" && ! -d "${COMPOSER_CACHE_DIR}" ]]; then
+    sudo mkdir -p "${COMPOSER_CACHE_DIR}"
+    sudo chown -R "${host_user}":"${host_user_group}" "${COMPOSER_CACHE_DIR}"
+    sudo chmod -R 777 "${COMPOSER_CACHE_DIR}"
+  fi
 
   if [[ ${MYSQL_ENABLE} == yes ]]; then
     mkdir -p "${project_dir}/sysdumps/mysql"

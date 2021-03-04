@@ -23,5 +23,5 @@ syncs:
         sync_excludes_type: 'none'      # set 'none' explicitly otherwise default type 'Name' will be passed to sync_exclude patterns
         sync_excludes:
             - 'Path .idea'
-            - 'Path var/tmp'
-            - 'Path .magento'
+            - 'Path {{APP_REL_PATH}}var/tmp'
+            - 'Path {{APP_REL_PATH}}.magento'

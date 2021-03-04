@@ -31,27 +31,34 @@ fi
 if [[ -d "{{WEBSITE_SHARE_DIR}}/composer" ]]; then
   composer_home="${HOME}/.composer"
   if [[ ! -d "${composer_home}" ]]; then
-    sudo -su $USER mkdir -p "${composer_home}" && chown -R $USER:$(id -gn) ${composer_home}
+    sudo -su $USER mkdir -p "${composer_home}"
   fi
 
+  if [[ "$(stat -c '%U' ${composer_home})" != "${USER}" ]]; then
+    sudo chown -R $USER:$(id -gn) ${composer_home}
+  fi
+
+  sudo chmod 777 --silent ${composer_home}
   cp -rf {{WEBSITE_SHARE_DIR}}/composer/* "${composer_home}/"
 fi
 
 # downgrade composer from v2 to v1 in case at least one dependency like '"composer-plugin-api": "^1.1"' is found in application composer.lock
 if [[ -f "{{WEBSITE_APPLICATION_ROOT}}/composer.lock" ]]; then
-  if [[ -n $(grep -E '\"composer-plugin-api\"\:\ \"[^~]?1\..*\"' "{{WEBSITE_APPLICATION_ROOT}}/composer.lock") && -z "$(composer --version | grep 'Composer version 1.')" ]]; then
+  if [[ -z "$(composer --version --no-plugins | grep 'Composer version 1.')" && -n $(grep -m 1 -E '\"composer-plugin-api\"\:\ \"[^~]?1\..*\"' "{{WEBSITE_APPLICATION_ROOT}}/composer.lock") ]]; then
     sudo composer self-update --1 > /dev/null 2>&1
+  fi
+fi
+
+# node modules are synced separately and then symlinked because of directory number of files
+if [[ -n "{{CONFIGS_PROVIDER_NODE_MODULES_DOCKER_SYNC}}" ]]; then
+  mkdir -p /var/www/node_modules_remote
+  if [[ -d "{{WEBSITE_NODE_MODULES_ROOT}}" && ! -d "{{WEBSITE_NODE_MODULES_ROOT}}/node_modules" && ! -s "{{WEBSITE_NODE_MODULES_ROOT}}/node_modules" ]]; then
+    ln -nsf /var/www/node_modules_remote "{{WEBSITE_NODE_MODULES_ROOT}}/node_modules"
   fi
 fi
 
 # add alias for devbox platform-tools utilities
 alias platform-tools="php {{TOOLS_PROVIDER_REMOTE_PATH}}/{{TOOLS_PROVIDER_ENTRYPOINT}}"
-
-# node modules are synced separately and then symlinked because of directory number of files
-if [[ -n "{{CONFIGS_PROVIDER_NODE_MODULES_DOCKER_SYNC}}" ]]; then
-  mkdir -p /var/www/node_modules_remote
-  ln -nsf /var/www/node_modules_remote {{WEBSITE_APPLICATION_ROOT}}/node_modules
-fi
 
 # Common application aliases
 alias coperm="platform-tools core:setup:permissions"

@@ -135,6 +135,10 @@ function install_extra_packages() {
   if [[ -z "$(which openssl)" ]]; then
     sudo apt-get install -y install openssl >/dev/null
   fi
+
+  if [[ -z "$(which setfacl)" ]]; then
+    sudo apt-get install -y install acl >/dev/null
+  fi
 }
 
 function register_devbox_scripts_globally() {

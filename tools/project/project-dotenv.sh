@@ -50,8 +50,8 @@ function prepare_project_dotenv_file() {
   apply_backward_compatibility_transformations "${project_up_dir}/.env"
   merge_defaults "${project_up_dir}/.env"
   add_computed_params "${project_up_dir}/.env"
-  add_static_dir_paths_for_docker_sync "${project_up_dir}/.env"
   evaluate_expression_values "${project_up_dir}/.env"
+  add_static_dir_paths_for_docker_sync "${project_up_dir}/.env"
 
   current_env_filepath=""
 
@@ -211,12 +211,40 @@ function add_static_dir_paths_for_docker_sync() {
   if [[ -z "$(dotenv_get_param_value 'COMPOSER_CACHE_DIR')" ]]; then
     _composer_cache_dir=''
     if [[ "$(dotenv_get_param_value 'CONFIGS_PROVIDER_COMPOSER_CACHE_DOCKER_SYNC')" == "global" ]]; then
-      _composer_cache_dir=$(composer config --global cache-dir)
+      _composer_cache_dir=$(composer config --global cache-dir 2>/dev/null)
     elif [[ "$(dotenv_get_param_value 'CONFIGS_PROVIDER_COMPOSER_CACHE_DOCKER_SYNC')" == "local" ]]; then
       _composer_cache_dir="${project_dir}/sysdumps/composer/"
     fi
 
     dotenv_set_param_value 'COMPOSER_CACHE_DIR' "${_composer_cache_dir}"
+  fi
+
+  # evaluate relative app path inside sources root to configure sync properly
+  if [[ -z "$(dotenv_get_param_value 'APP_REL_PATH')" ]]; then
+    if [[ "$(dotenv_get_param_value 'WEBSITE_SOURCES_ROOT')" != "$(dotenv_get_param_value 'WEBSITE_APPLICATION_ROOT')" ]]; then
+      local _app_relative_path
+      _sources_root="$(dotenv_get_param_value 'WEBSITE_SOURCES_ROOT')"
+      _app_root="$(dotenv_get_param_value 'WEBSITE_APPLICATION_ROOT')"
+      _app_relative_path=$(echo "${_app_root}" | sed "s|${_sources_root}||" | sed "s|^/||" | sed "s|/$||")
+
+      if [[ -n "${_app_relative_path}" ]]; then
+        dotenv_set_param_value 'APP_REL_PATH' "${_app_relative_path}/"
+      fi
+    fi
+  fi
+
+  # evaluate relative node_modules path inside sources root to configure sync properly
+  if [[ -z "$(dotenv_get_param_value 'NODE_MODULES_REL_PATH')" ]]; then
+    if [[ -n "$(dotenv_get_param_value 'WEBSITE_NODE_MODULES_ROOT')" ]]; then
+      local _node_modules_relative_path
+      _sources_root="$(dotenv_get_param_value 'WEBSITE_SOURCES_ROOT')"
+      _node_modules_root="$(dotenv_get_param_value 'WEBSITE_NODE_MODULES_ROOT')"
+      _node_modules_relative_path=$(echo "${_node_modules_root}" | sed "s|${_sources_root}||" | sed "s|^/||" | sed "s|/$||")
+
+      if [[ -n "${_node_modules_relative_path}" ]]; then
+        dotenv_set_param_value 'NODE_MODULES_REL_PATH' "${_node_modules_relative_path}/"
+      fi
+    fi
   fi
 }
 
