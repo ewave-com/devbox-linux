@@ -7,17 +7,29 @@ shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
 
 # Custom prompt
-PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+PS1='\[\033[01;32m\]\u@{{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 
 # Add color
 eval `dircolors -b`
 
+sudo chmod 777 /var/www
+
+# install git autocompletion
+if [ ! -f ~/.git-completion.bash ]; then
+  git_version="$(git --version | sed 's/.*\ //')"
+  curl https://raw.githubusercontent.com/git/git/v${git_version}/contrib/completion/git-completion.bash -s -o ~/.git-completion.bash > /dev/null
+  sudo chmod ugo+x ~/.git-completion.bash
+fi
+test -f ~/.git-completion.bash && source ~/.git-completion.bash
+
 # change initial directory to app dir by login
 cd {{WEBSITE_APPLICATION_ROOT}}
 
+app_user=$(whoami)
+
 # allow access to common share directory
-if [[ -d "{{WEBSITE_SHARE_DIR}}" && "$(stat -c '%U' {{WEBSITE_SHARE_DIR}})" != "${USER}" ]];then
-  sudo chown -R $USER:$(id -gn) {{WEBSITE_SHARE_DIR}}
+if [[ -d "{{WEBSITE_SHARE_DIR}}" && "$(stat -c '%U' {{WEBSITE_SHARE_DIR}})" != "${app_user}" ]];then
+  sudo chown -R ${app_user}:$(id -gn) {{WEBSITE_SHARE_DIR}}
 fi
 
 # copy ssh keys from the shared ssh dir into .ssh and set required permissions
@@ -31,14 +43,14 @@ fi
 if [[ -d "{{WEBSITE_SHARE_DIR}}/composer" ]]; then
   composer_home="${HOME}/.composer"
   if [[ ! -d "${composer_home}" ]]; then
-    sudo -su $USER mkdir -p "${composer_home}"
-    sudo chmod 777 --silent ${composer_home}
+    sudo -su ${app_user} mkdir -p "${composer_home}"
   fi
 
-  if [[ "$(stat -c '%U' ${composer_home})" != "${USER}" ]]; then
-    sudo chown -R $USER:$(id -gn) ${composer_home}
+  if [[ "$(stat -c '%U' ${composer_home})" != "${app_user}" ]]; then
+    sudo chown -R ${app_user}:$(id -gn) ${composer_home}
   fi
 
+  sudo chmod 777 --silent ${composer_home}
   cp -rf {{WEBSITE_SHARE_DIR}}/composer/* "${composer_home}/"
 fi
 

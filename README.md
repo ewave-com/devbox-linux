@@ -9,5 +9,6 @@ DevBox also enables the creation of flexible server infrastructure based on Dock
 
 - [How to create a new project](_doc/articles/hot_to_create_a_new_project.md)
 - [How to configure project .env file](_doc/articles/project_dotenv.md)
-- [Platform tool](_doc/articles/platform_tools.md)
+- [How to configure project .env-project.json](_doc/articles/project_env_project_json.md)
+- [Platform tools](_doc/articles/platform_tools.md)
 - [Devbox file structure](_doc/articles/file_structure.md)

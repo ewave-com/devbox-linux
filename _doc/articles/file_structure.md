@@ -1,4 +1,4 @@
-## DevBox File Structure
+# DevBox File Structure
 
 ```bash
 {devbox_root}
