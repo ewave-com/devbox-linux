@@ -120,8 +120,16 @@ or
 ### Subsection `sources->db`
 Subsection `sources->db` defines params of database dump storage. You can specify a source of sql dump in raw or gzipped format to be downloaded.
 The section required for platform tools command `core:setup:db`. (see related [DevBox Platform Tools](platform_tools.md))
+
 Dump file will be downloaded to the directory specified in the param subsection `local_temp_path`, then it will be 
 unzipped within this directory if required and imported to project database host described in your project .env.
+
+The option `import_gzipped_sql_directly` is responsible for the dump import approach. It defines if imported dump will
+be unpacked "on fly" to be imported to mysql. Otherwise GZ archive will be unzipped to separate sql file and then this
+plain sql file will be imported.
+Unpacking "on fly" is usefull when you have to import large dump file but free disk space is poor.
+Default option is `true`, so this option could be omitted. Set it to `false` only if you faced with some troubles the feature
+and want to perform import using 2 separate files.
 
 Available value of 'source_type': `owncloud`, `ftp`, `http`, `local`.
 
@@ -132,7 +140,8 @@ Examples:
             "source_path": "https://owncloud.mycompany.com/remote.php/webdav/my_project/dumps/my_project_db_dump.sql.gz",
             "source_login": "my_login",
             "source_password": "my_password",
-            "local_temp_path": "[~temp_storage]/db"
+            "local_temp_path": "[~temp_storage]/db",
+            "import_gzipped_sql_directly": true
         },
 ```
 or
@@ -142,7 +151,8 @@ or
             "source_path": "ftp://my_ftp_host/my_project/dumps/my_project_db_dump.sql.gz",
             "source_login": "my_login",
             "source_password": "my_password",
-            "local_temp_path": "[~temp_storage]/db"
+            "local_temp_path": "[~temp_storage]/db",
+            "import_gzipped_sql_directly": true
         },
 ```
 or
@@ -152,7 +162,8 @@ or
             "source_path": "http://my_http_host/my_project/dumps/my_project_db_dump.sql.gz",
             "source_login": "my_login",
             "source_password": "my_password",
-            "local_temp_path": "[~temp_storage]/db"
+            "local_temp_path": "[~temp_storage]/db",
+            "import_gzipped_sql_directly": true
         },
 ```
 or
@@ -160,7 +171,8 @@ or
         "db": {
             "source_type": "local",
             "source_path": "/var/www/share/dumps/my_project_db_dump.sql.gz",
-            "local_temp_path": "[~temp_storage]/db"
+            "local_temp_path": "[~temp_storage]/db",
+            "import_gzipped_sql_directly": true
         },
 ```
 
