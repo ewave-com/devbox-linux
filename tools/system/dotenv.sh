@@ -38,9 +38,7 @@ function dotenv_has_param() {
 
   dotenv_ensure_param_is_readable "${_param_name}" "${_env_filepath}"
 
-  local _param_presented
-  _param_presented=$(cat "${_env_filepath}" | grep "^${_param_name}=")
-  if [[ -n ${_param_presented} ]]; then
+  if [[ -n $(cat "${_env_filepath}" | grep "^${_param_name}=") ]]; then
     echo "1"
   else
     echo "0"
@@ -54,9 +52,7 @@ function dotenv_has_param_value() {
 
   dotenv_ensure_param_is_readable "${_param_name}" "${_env_filepath}"
 
-  local _param_value
-  _param_value=$(dotenv_get_param_value "${_param_name}" "${_env_filepath}")
-  if [[ -n ${_param_value} ]]; then
+  if [[ -n $(dotenv_get_param_value "${_param_name}" "${_env_filepath}") ]]; then
     echo "1"
   else
     echo "0"

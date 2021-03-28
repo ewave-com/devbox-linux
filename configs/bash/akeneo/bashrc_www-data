@@ -56,7 +56,7 @@ fi
 
 # downgrade composer from v2 to v1 in case at least one dependency like '"composer-plugin-api": "^1.1"' is found in application composer.lock
 if [[ -f "{{WEBSITE_APPLICATION_ROOT}}/composer.lock" ]]; then
-  if [[ -z "$(composer --version --no-plugins | grep 'Composer version 1.')" && -n $(grep -m 1 -E '\"composer-plugin-api\"\:\ \"[^~]?1\..*\"' "{{WEBSITE_APPLICATION_ROOT}}/composer.lock") ]]; then
+  if [[ -z "$(composer --version --no-plugins | grep 'Composer version 1.')" && -n $(grep -m 1 -E '\"composer-plugin-api\"\:\ \"[^~]?1\.[0-9.]+\"' "{{WEBSITE_APPLICATION_ROOT}}/composer.lock") ]]; then
     sudo composer self-update --1 > /dev/null 2>&1
   fi
 fi

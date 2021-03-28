@@ -1,0 +1,28 @@
+version: "2"
+
+options:
+    project_root: config_path
+    # devbox_show_logs_for_syncs - comma-separated syncs list to show their logs
+    devbox_show_logs_for_syncs: {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync
+
+syncs:
+    {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync:
+        src: '{{DEVBOX_PROJECT_DIR}}/public_html'
+        sync_strategy: 'native'         # Linux specific, WinOs / MacOs specific have 'unison' strategy
+        watch_only: true                # Ewave custom option, skip initial sync expect precopy to run only background watch
+        sync_userid: 33                 # desired userid inside target project container
+        sync_args:
+            - "-perms=0"
+            - "-dontchmod=true"
+            - "-fastcheck=true"
+            - "-fastercheckUNSAFE=true"
+            - "-maxthreads=100"
+            - "-ignorelocks=true"
+            - "-numericids=false"
+            - "-confirmbigdel=false"
+        sync_excludes_type: 'none'      # set 'none' explicitly otherwise default type 'Name' will be passed to sync_exclude patterns
+        sync_excludes:
+            - 'Path .idea'
+            - 'Path {{APP_REL_PATH}}var/cache'
+            - 'Path {{APP_REL_PATH}}var/logs'
+#            - 'Path {{NODE_MODULES_REL_PATH}}node_modules'      # sync node_modules together with public_html as Akeneo can not follow node_modules_remote symlink
