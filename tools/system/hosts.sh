@@ -17,7 +17,7 @@ function add_website_domain_to_hosts() {
     # Add site to file hosts, if doesn't exist
     local _hosts_record
     _hosts_record="${_ip_address} ${_domain}"
-    if [[ -z $(sudo cat /etc/hosts | grep "${_hosts_record}" | head -n 1) ]]; then
+    if [[ -z $(cat /etc/hosts | grep "${_hosts_record}" | head -n 1) ]]; then
       sudo -- sh -c -e "echo '${_hosts_record}' >> /etc/hosts"
     fi
   done

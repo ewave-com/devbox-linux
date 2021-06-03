@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 set -eu
 
-export devbox_root=$(realpath $(dirname "${BASH_SOURCE[0]}")) || $(pwd)
+# 'realpath' might be not installed
+if [[ ! -z "$(which realpath)" ]]; then
+  devbox_root=$(realpath $(dirname "${BASH_SOURCE[0]}"))
+else
+  devbox_root=`dirname "$0"`
+  [[ "${devbox_root}" == "." ]] && devbox_root="${PWD}"
+fi
+export devbox_root
 
 source "${devbox_root}/tools/system/require-once.sh"
 
@@ -35,6 +42,12 @@ case $_selected_down_type in
   fi
   stop_devbox_project "${_selected_project}"
   ;;
+"down_one")
+  if [[ -z "${_selected_project}" ]]; then
+    select_project_menu "_selected_project"
+  fi
+  down_devbox_project "${_selected_project}"
+  ;;
 "down_and_clean_one")
   if [[ -z "${_selected_project}" ]]; then
     select_project_menu "_selected_project"
@@ -43,6 +56,9 @@ case $_selected_down_type in
   ;;
 "stop_all")
   stop_devbox_all
+  ;;
+"down_all")
+  down_devbox_all
   ;;
 "down_and_clean_all")
   down_and_clean_devbox_all

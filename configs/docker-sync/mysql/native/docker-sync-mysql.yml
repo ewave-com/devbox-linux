@@ -1,0 +1,9 @@
+version: "2"
+
+options:
+    project_root: config_path
+
+syncs:
+    {{PROJECT_NAME}}_{{CONTAINER_MYSQL_NAME}}_data_sync:
+        src: '{{DEVBOX_PROJECT_DIR}}/sysdumps/mysql'
+        sync_strategy: 'native'

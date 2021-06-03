@@ -112,9 +112,9 @@ function merge_defaults() {
     exit 1
   fi
 
-  echo -en "\n\n" >>"${_env_filepath}"
+  printf "\n\n" >>"${_env_filepath}"
   echo "########## Default params ##########" >>"${_env_filepath}"
-  echo -en "# The following params are evaluated or imported from defaults file: '${dotenv_defaults_filepath}'\n" >>"${_env_filepath}"
+  printf "# The following params are evaluated or imported from defaults file: '%s'\n" "${dotenv_defaults_filepath}" >>"${_env_filepath}"
 
   # | sed -e 's/.*=//g'
   for _param_line in $(cat "${dotenv_defaults_filepath}" | grep -Ev "^$" | grep -v '^#'); do
@@ -126,7 +126,7 @@ function merge_defaults() {
     if [[ "${_param_presented}" == "0" ]]; then
       local _param_default_value
       _param_default_value=$(echo "${_param_line}" | awk -F= '{print $2}')
-      echo -en "${_param_name}=${_param_default_value}\n" >>"${_env_filepath}"
+      printf "%s=%s\n" "${_param_name}" "${_param_default_value}" >>"${_env_filepath}"
     fi
   done
 }
@@ -193,6 +193,30 @@ function add_computed_params() {
       fi
     fi
     dotenv_set_param_value 'WEBSITE_PHP_XDEBUG_HOST' "${_computed_xdebug_host}"
+  fi
+
+  # set OS mysql docker-sync type if 'default' chosen
+  local _mysql_docker_sync_provider
+  _mysql_docker_sync_provider=$(dotenv_get_param_value 'CONFIGS_PROVIDER_MYSQL_DOCKER_SYNC')
+  if [[ "${_mysql_docker_sync_provider}" == "default" ]]; then
+    if [[ "${os_type}" == "macos" ]]; then
+      _mysql_docker_sync_provider="unison"
+    elif [[ "${os_type}" == "linux" ]]; then
+      _mysql_docker_sync_provider="native"
+    fi
+    dotenv_set_param_value 'CONFIGS_PROVIDER_MYSQL_DOCKER_SYNC' "${_mysql_docker_sync_provider}"
+  fi
+
+  # set OS elasticsearch docker-sync type if 'default' chosen
+  local _es_docker_sync_provider
+  _es_docker_sync_provider=$(dotenv_get_param_value 'CONFIGS_PROVIDER_ELASTICSEARCH_DOCKER_SYNC')
+  if [[ "${_es_docker_sync_provider}" == "default" ]]; then
+    if [[ "${os_type}" == "macos" ]]; then
+      _es_docker_sync_provider="unison"
+    elif [[ "${os_type}" == "linux" ]]; then
+      _es_docker_sync_provider="native"
+    fi
+    dotenv_set_param_value 'CONFIGS_PROVIDER_ELASTICSEARCH_DOCKER_SYNC' "${_es_docker_sync_provider}"
   fi
 }
 

@@ -6,3 +6,4 @@ opcache.revalidate_freq = 10
 session.auto_start = off
 session.gc_maxlifetime=8640000
 suhosin.session.cryptua = off
+auto_prepend_file = {{auto_prepend_filepath}}

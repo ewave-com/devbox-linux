@@ -2,6 +2,7 @@
 
 require_once "${devbox_root}/tools/system/constants.sh"
 require_once "${devbox_root}/tools/system/output.sh"
+require_once "${devbox_root}/tools/project/project-state.sh"
 
 ############################ Public functions ############################
 
@@ -42,7 +43,7 @@ function is_project_started() {
     return
   fi
 
-  if [[ -f "${_project_up_dir}/project-stopped.flag" ]]; then
+  if [[ $(is_state_file_exists "${_project_up_dir}/${state_file_name}") == "0" ]] || [[ $(get_state_last_project_status "${_project_up_dir}/${state_file_name}") != "started" ]]; then
     echo "0"
     return
   fi

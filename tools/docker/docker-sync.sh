@@ -28,6 +28,9 @@ function docker_sync_start() {
   local _show_logs_for_syncs
   _show_logs_for_syncs="$(get_config_file_option ${_config_file} 'devbox_show_logs_for_syncs')"
 
+  local _sync_strategy
+  _sync_strategy="$(get_config_file_sync_strategy ${_config_file})"
+
   # start syncs using explicit docker-sync sync name to have separate daemon pid file and logging for each sync
   for _sync_name in ${_sync_names}; do
     if [[ "$(is_docker_container_exist '${_sync_name}')" == "0" ]]; then
@@ -42,7 +45,7 @@ function docker_sync_start() {
 
     echo "[$(date)] Starting synchronization..." >>"${_working_dir}/${_sync_name}.log"
 
-    if [[ "${_show_logs}" == "1" && -n "$(echo ${_show_logs_for_syncs} | grep ${_sync_name})" && "${os_type}" != "linux" ]]; then
+    if [[ "${_show_logs}" == "1" && -n "$(echo ${_show_logs_for_syncs} | grep ${_sync_name})" && "${_sync_strategy}" != "native" ]]; then
       if [[ -n "$(echo ${_show_logs_for_syncs} | grep ${_sync_name})" ]]; then
         show_success_message "Opening logs window for sync ${_sync_name}" "3"
         show_sync_logs_window "${_config_file}" "${_sync_name}"
@@ -59,7 +62,7 @@ function docker_sync_start() {
 
   done
 
-  if [[ "${_with_health_check}" == "1" && "${os_type}" != "linux" ]]; then
+  if [[ "${_with_health_check}" == "1" && "${_sync_strategy}" != "native" ]]; then
     start_background_health_checker "${_config_file}"
   fi
 }
@@ -74,10 +77,13 @@ function docker_sync_stop() {
     exit 1
   fi
 
+  local _sync_strategy
+  _sync_strategy="$(get_config_file_sync_strategy ${_config_file})"
+
   show_success_message "Stopping docker-sync for all syncs from config '$(basename ${_config_file})'" "3"
 
   # terminate health-checker background processes
-  if [[ "${_kill_service_processes}" == "1" && "${os_type}" != "linux" ]]; then
+  if [[ "${_kill_service_processes}" == "1" && "${_sync_strategy}" != "native" ]]; then
     stop_background_health_checker "${_config_file}"
   fi
 
@@ -92,7 +98,7 @@ function docker_sync_stop() {
     exit 1
   fi
 
-  if [[ "${_kill_service_processes}" == "1" && "${os_type}" != "linux" ]]; then
+  if [[ "${_kill_service_processes}" == "1" && "${_sync_strategy}" != "native"  ]]; then
     close_sync_logs_window "${_config_file}"
   fi
 }
@@ -385,6 +391,20 @@ function get_config_file_option() {
   _option_value=$(cat ${_config_file} | sed -n '/^options:/,/^syncs:/p' | grep "${_option_name}" | awk -F': ' '{print $2}')
 
   echo "${_option_value}"
+}
+
+function get_config_file_sync_strategy() {
+  local _config_file=$1
+
+  if [[ ! -f "${_config_file}" ]]; then
+    show_error_message "Unable to retrieve sync option. File does not exist at path  '${_config_file}'."
+    exit 1
+  fi
+
+  local _sync_strategy
+  _sync_strategy=$(cat ${_config_file} | grep -A 20 "^syncs:" | grep "sync_strategy:" | awk -F': ' '{print $2}' | sed 's/#\s.*//' | tr -d " '")
+
+  echo "${_sync_strategy}"
 }
 
 ############################ Local functions end ############################

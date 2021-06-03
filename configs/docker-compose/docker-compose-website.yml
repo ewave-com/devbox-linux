@@ -23,6 +23,7 @@ services:
             - ./configs/php/ini/xdebug.ini:/etc/php/{{PHP_VERSION}}/mods-available/xdebug.ini
             - ./configs/php/ini/xdebug.ini:/etc/php/{{PHP_VERSION}}/cli/conf.d/20-xdebug.ini
             - ./configs/php/ini/zzz-custom.ini:/etc/php/{{PHP_VERSION}}/mods-available/zzz-custom.ini
+            - ./configs/php/auto_prepend_file.php:/etc/php/{{PHP_VERSION}}/auto_prepend_file.php
             - ./configs/cron:/var/spool/cron/crontabs
             - ./../../../{{TOOLS_PROVIDER}}:{{TOOLS_PROVIDER_REMOTE_PATH}}
         networks:

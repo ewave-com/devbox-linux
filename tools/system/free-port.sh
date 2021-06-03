@@ -126,9 +126,39 @@ function ensure_port_is_available() {
   local _used_port
   _used_port=$(find_port_by_regex "${_checked_port}")
   if [[ "${_checked_port}" == "${_used_port}" ]]; then
-    show_error_message "Unable to allocate port '${_checked_port}' as it is already in use. Please free the port and try again."
+    _process_info="$(get_process_info_by_allocated_port ${_checked_port})"
+    show_error_message "Unable to allocate port '${_checked_port}' as it is already in use (${_process_info}). Please free the port and try again."
     exit 1
   fi
+}
+
+function get_process_info_by_allocated_port() {
+  local _checked_port=${1-""}
+
+  if [[ -z ${_checked_port} ]]; then
+    show_error_message "Unable to check port allocation. Port number argument cannot be empty"
+    exit 1
+  fi
+
+  _port_mask=$(get_port_full_search_mask ${_checked_port})
+
+  if [[ "${os_type}" == "macos" ]]; then
+    _pid=$(sudo netstat -anvp tcp | grep -E "${_port_mask}" | grep "LISTEN" | grep -v "::1:" | awk '{print $9}' | head -n 1)
+    if [[ -n ${_pid} ]]; then
+      _pname=$(ps -e -c -o comm ${_pid} | grep -v "COMM")
+      echo "PID: ${_pid}; Process name: '${_pname}'"
+      return
+    fi
+  elif [[ "${os_type}" == "linux" ]]; then
+    _pid=$(sudo netstat -tlpn tcp | grep -E "${_port_mask}" | grep "LISTEN" | grep -v "::1:" | awk '{print $7}' | head -n 1 | cut -d'/' -f 1)
+    if [[ -n ${_pid} ]]; then
+      _pname=$(ps -c -o comm --no-headers -f ${_pid})
+      echo "PID: ${_pid}; Process name: '${_pname}'"
+      return
+    fi
+  fi
+
+  echo ""
 }
 
 ############################ Public functions end ############################
@@ -145,24 +175,37 @@ function find_port_by_regex() {
 
   local _port_mask
   local _port
+
+  _port_mask=$(get_port_full_search_mask ${_port_mask})
+  if [[ "${os_type}" == "macos" ]]; then
+    _port=$(sudo netstat -anvp tcp | grep -E "${_port_mask}" | grep "LISTEN" | grep -v "::1:" | awk '{print $4}' | sed 's/.*\.//' | sort -g -r | head -n 1)
+  elif [[ "${os_type}" == "linux" ]]; then
+    _port=$(sudo netstat -tlpn | grep -E "${_port_mask}" | grep "LISTEN" | grep -v "::1:" | awk '{print $4}' | sed 's/.*://' | sort -g -r | head -n 1)
+  fi
+
+  echo ${_port}
+}
+
+function get_port_full_search_mask() {
+  local _port_mask=${1-""}
+
+  if [[ -z ${_port_mask} ]]; then
+    show_error_message "Unable to find available port by empty mask."
+    exit 1
+  fi
+
   # if mask is only numbers - prepend possible hosts to clarify output
   if [[ ! "${_port_mask}" =~ ^: ]]; then
     if [[ "${os_type}" == "macos" ]]; then
       # MacOs specific, Linux: port separator = semicolon, MacOs: port separator = dot
-      _port_mask="'(\*\.${_port_mask}\s)|(:::${_port_mask}\s)|(0\.0\.0\.0:${_port_mask}\s)|(127\.0\.0\.1:${_port_mask}\s)"
+      _port_mask="(\*\.${_port_mask}\s)|(::.${_port_mask}\s)|(0\.0\.0\.0.${_port_mask}\s)|(127\.0\.0\.1.${_port_mask}\s)"
     elif [[ "${os_type}" == "linux" ]]; then
       # Linux: port separator = semicolon, MacOs: port separator = dot
-      _port_mask="'(\*\:${_port_mask}\s)|(:::${_port_mask}\s)|(0\.0\.0\.0:${_port_mask}\s)|(127\.0\.0\.1:${_port_mask}\s)"
+      _port_mask="(\*\:${_port_mask}\s)|(:::${_port_mask}\s)|(0\.0\.0\.0:${_port_mask}\s)|(127\.0\.0\.1:${_port_mask}\s)"
     fi
   fi
 
-  if [[ "${os_type}" == "macos" ]]; then
-    _port=$(sudo netstat -anvp tcp | grep -E "${_port_mask}" | grep "LISTEN" | awk '{print $4}' | grep -v "::1:" | sed 's/.*://' | sort -g -r | head -n 1)
-  elif [[ "${os_type}" == "linux" ]]; then
-    _port=$(sudo netstat -tlpn | grep -E "${_port_mask}" | grep "LISTEN" | awk '{print $4}' | grep -v "::1:" | sed 's/.*://' | sort -g -r | head -n 1)
-  fi
-
-  echo ${_port}
+  echo ${_port_mask}
 }
 
 ############################ Local functions end ############################

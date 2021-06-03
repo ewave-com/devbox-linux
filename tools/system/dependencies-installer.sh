@@ -5,14 +5,28 @@ require_once "${devbox_root}/tools/system/output.sh"
 
 ############################ Public functions ############################
 
+export devbox_env_path_updated="0"
+
 function install_dependencies() {
+  show_success_message "Validating software dependencies"
+
   install_docker
   install_docker_sync
-  #install_unison # not needed because of native sync
+#  install_unison # not needed because of native sync, you can install and try to use it, but this way was not tested
   install_git
   install_composer
   install_extra_packages
   register_devbox_scripts_globally
+
+  if [[ "${devbox_env_path_updated}" == "1" ]]; then
+    show_warning_message "###########################################################################################"
+    show_success_message "Installed packages updated your PATH system variable."
+    show_warning_message "!!! To apply changes please close this window and start again using new console window !!!."
+    show_warning_message "###########################################################################################"
+    unset_flag_terminal_restart_required
+    exit
+  fi
+  unset_flag_terminal_restart_required
 }
 
 ############################ Public functions end ############################
@@ -20,7 +34,6 @@ function install_dependencies() {
 ############################ Local functions ############################
 
 # Check and install docker
-# If docker don't install, script will setup it.
 function install_docker() {
   local _docker_location=$(which docker)
   local _docker_compose_location=$(which docker-compose)
@@ -69,14 +82,30 @@ function install_docker() {
 
 function install_docker_sync() {
   if [[ -z "$(which ruby)" || -z "$(which gem)" ]]; then
-    sudo apt-get install -y ruby ruby-dev >/dev/null
+    # ruby@2.7 required, otherwise (ruby 3.0+) very old docker-sync (like 0.1) is installed from repos instead of needed 0.5.14+
+    sudo apt-get install -y ruby2.7 ruby2.7-dev >/dev/null
+
+    set_flag_terminal_restart_required
   fi
 
   if [[ -z "$(which docker-sync)" ]]; then
-    sudo gem install docker-sync --quiet >/dev/null
+    sudo gem install docker-sync -v 0.6 --quiet >/dev/null
 
-    _docker_sync_lib_sources_dir="$(dirname "$(gem which docker-sync)")"
+    set_flag_terminal_restart_required
+  fi
+
+  # sync one of docker-sync files with patched version
+  _docker_sync_lib_sources_dir="$(dirname "$(gem which docker-sync)")"
+  _target_chsum=$(md5sum "${_docker_sync_lib_sources_dir}/docker-sync/sync_strategy/unison.rb" | awk -F' ' '{print $1}')
+  _source_chsum=$(md5sum "${devbox_root}/tools/bin/docker-sync/lib/docker-sync/sync_strategy/unison.rb" | awk -F' ' '{print $1}')
+  if [[ "${_target_chsum}" != "${_source_chsum}" ]]; then
     sudo cp -f "${devbox_root}/tools/bin/docker-sync/lib/docker-sync/sync_strategy/unison.rb" "${_docker_sync_lib_sources_dir}/docker-sync/sync_strategy/unison.rb"
+  fi
+}
+
+function install_unison() {
+  if [[ -z "$(which unison)" ]]; then
+    sudo apt-get install unison >/dev/null
   fi
 }
 
@@ -108,6 +137,8 @@ function install_composer() {
 
   if [ -z "$(which composer)" ]; then
     run_composer_installer
+
+    set_flag_terminal_restart_required
   fi
 
   local _composer_output=''
@@ -116,7 +147,7 @@ function install_composer() {
     # locally catch the possible composer error without application stopping
     set +e && _composer_output=$(COMPOSER="${devbox_root}/composer.json" composer install --quiet) && set -e
   elif [[ "${composer_autoupdate}" == "1" && -n $(find "${devbox_root}/composer.lock" -mmin +604800) ]]; then
-    show_success_message "Running composer update command to refresh packages. Last run is a week ago. Please wait a few seconds"
+    show_success_message "Running composer update command to refresh packages. Last run was performed a week ago. Please wait a few seconds"
     set +e && _composer_output=$(COMPOSER="${devbox_root}/composer.json" composer update --quiet) && set -e
   fi
 
@@ -146,12 +177,38 @@ function register_devbox_scripts_globally() {
   sudo chmod ug+x "${devbox_root}/down-devbox.sh"
   sudo chmod ug+x "${devbox_root}/sync-actions.sh"
 
-  if [[ -z $(echo "${PATH}" | grep "${devbox_root}") ]]; then
-    echo -en '\n' >>~/.bashrc
-    echo "export PATH='${PATH}:${devbox_root}'" >>~/.bashrc
+  add_directory_to_env_path "${devbox_root}"
+}
 
-    export PATH="${PATH}:${devbox_root}"
+function add_directory_to_env_path() {
+  local _bin_dir=${1-''}
+
+  if [[ -z "${_bin_dir}" || ! -d "${_bin_dir}" ]]; then
+    show_error_message "Unable to update system PATH. Path to binaries is empty or does not exist '${_bin_dir}'."
   fi
+
+  # add new binaries path to env variables of current shell
+  if [[ -z $(echo "${PATH}" | grep "${_bin_dir}" ) ]]; then
+    export PATH="${PATH}:${_bin_dir}"
+
+    set_flag_terminal_restart_required
+  fi
+
+  # save new binaries path to permanent user env variables storage to avoid cleaning
+  if [[ -z $(cat ~/.bashrc | grep "export PATH=" | grep "${_bin_dir}" ) ]]; then
+    printf '\n# Devbox Path \n' >> ~/.bashrc
+    echo 'export PATH="${PATH}:'${_bin_dir}'"' >> ~/.bashrc
+
+    set_flag_terminal_restart_required
+  fi
+}
+
+function set_flag_terminal_restart_required() {
+  export devbox_env_path_updated="1"
+}
+
+function unset_flag_terminal_restart_required() {
+  unset devbox_env_path_updated
 }
 
 ############################ Local functions end ############################

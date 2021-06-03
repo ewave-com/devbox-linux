@@ -17,8 +17,8 @@ sudo chmod 777 /var/www
 # install git autocompletion
 if [ ! -f ~/.git-completion.bash ]; then
   git_version="$(git --version | sed 's/.*\ //')"
-  curl https://raw.githubusercontent.com/git/git/v${git_version}/contrib/completion/git-completion.bash -s -o ~/.git-completion.bash > /dev/null
-  sudo chmod ugo+x ~/.git-completion.bash
+  curl https://raw.githubusercontent.com/git/git/v${git_version}/contrib/completion/git-completion.bash --max-time 5 -s -o ~/.git-completion.bash > /dev/null
+  test -f ~/.git-completion.bash && sudo chmod ugo+x ~/.git-completion.bash
 fi
 test -f ~/.git-completion.bash && source ~/.git-completion.bash
 
@@ -29,7 +29,7 @@ app_user=$(whoami)
 
 # allow access to common share directory
 if [[ -d "{{WEBSITE_SHARE_DIR}}" && "$(stat -c '%U' {{WEBSITE_SHARE_DIR}})" != "${app_user}" ]];then
-  sudo chown -R www-data:www-data {{WEBSITE_SHARE_DIR}}
+  sudo chown -R ${app_user}:$(id -gn) {{WEBSITE_SHARE_DIR}}
 fi
 
 # copy ssh keys from the shared ssh dir into .ssh and set required permissions

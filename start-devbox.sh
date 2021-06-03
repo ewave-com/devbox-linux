@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 set -eu
 
-export devbox_root=$(realpath $(dirname "${BASH_SOURCE[0]}")) || $(pwd)
+# 'realpath' might be not installed
+if [[ ! -z "$(which realpath)" ]]; then
+  devbox_root=$(realpath $(dirname "${BASH_SOURCE[0]}"))
+else
+  devbox_root=`dirname "$0"`
+  [[ "${devbox_root}" == "." ]] && devbox_root="${PWD}"
+fi
+export devbox_root
 
 # bash version must be 3.0+ for proper work of devbox
 source "${devbox_root}/tools/system/check-bash-version.sh"

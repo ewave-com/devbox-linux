@@ -11,7 +11,7 @@ function select_down_type_menu() {
 
   draw_menu_header "Stop project menu"
 
-  local _options_str="Stop 1 project,Stop ALL projects,Down and clean 1 project,Down and clean all projects,Destroy docker data[for emergency case],[Exit]"
+  local _options_str="Stop 1 project,Stop ALL projects,Down 1 project,Down all projects,Down and clean 1 project,Down and clean all projects,Destroy docker data[for emergency case],[Exit]"
 
   local _selected_type
   select_menu_item "${_options_str[@]}" "_selected_type"
@@ -25,6 +25,10 @@ function select_down_type_menu() {
     _selected_type='stop_one'
   elif [[ "${_selected_type}" == "Stop ALL projects" ]]; then
     _selected_type='stop_all'
+  elif [[ "${_selected_type}" == "Down 1 project" ]]; then
+    _selected_type='down_one'
+  elif [[ "${_selected_type}" == "Down all projects" ]]; then
+    _selected_type='down_all'
   elif [[ "${_selected_type}" == "Down and clean 1 project" ]]; then
     _selected_type='down_and_clean_one'
   elif [[ "${_selected_type}" == "Down and clean all projects" ]]; then

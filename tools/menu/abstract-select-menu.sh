@@ -13,10 +13,11 @@ require_once "${devbox_root}/tools/system/output.sh"
 
 function select_menu_item() {
   if [[ "${BASH_VERSION}" =~ ^[1-3]\. ]]; then
-    show_warning_message "Menu will be slow because of limitations of old BASH version. Your version: ${BASH_VERSION}. Recommended version is 4.0+."
+    show_warning_message "Menu navigation using arrow keys will be slow because of limitations of old BASH version. Your version: ${BASH_VERSION}. Recommended version is 4.0+."
+    show_warning_message "You can use numbers to navigate or update your bash version to use all modern features."
     if [[ -f "/usr/local/bin/bash" && "$(/usr/local/bin/bash -c 'echo $BASH_VERSION')" =~ ^[5-9]\. ]]; then
-      show_warning_message "Recommeded BASH version found at path \"/usr/local/bin/bash\" but not used by default."
-      show_warning_message "You migth enable BASH version \"$(/usr/local/bin/bash -c 'echo $BASH_VERSION')\" by default executing command \"chsh -s /usr/local/bin/bash\""
+      show_warning_message "Recommended BASH version found at path \"/usr/local/bin/bash\" but not used by default."
+      show_warning_message "You can enable BASH version \"$(/usr/local/bin/bash -c 'echo $BASH_VERSION')\" by default executing command \"chsh -s /usr/local/bin/bash\""
     fi
   fi
 
@@ -57,7 +58,7 @@ function select_menu_item() {
 
   # Draw initial Menu
   draw_menu
-  while read -sn1 keycode; do # 1 char (not delimiter), silent
+  while read -s -n 1 keycode; do # 1 char (not delimiter), silent
     # Check for enter/space (\x0A - enter, \x20 - space)
     if [[ "${keycode}" == $'\x0A' || "${keycode}" == $'\x20' || "${keycode}" == '' ]]; then break; fi
     # Allow typing numeric index of selection
@@ -69,11 +70,11 @@ function select_menu_item() {
       fi
     else
       # catch multi-char special key sequences
-      # BASH_VERSION < 4.0 doesnt have a fractional timeout of key stroke, so we use long reading to avoid command fatal
+      # BASH_VERSION < 4.0 doesnt have a fractional timeout of key stroke, so we use long reading to keep it working
       if [[ ! "${BASH_VERSION}" =~ ^[1-3]\. ]]; then
-        read -s -n 1 -t 0.0001 k1 || true
-        read -s -n 1 -t 0.0001 k2 || true
-        read -s -n 1 -t 0.0001 k3 || true
+        read -s -n 1 -t 0.001 k1 || true
+        read -s -n 1 -t 0.001 k2 || true
+        read -s -n 1 -t 0.001 k3 || true
       else
         read -s -n 1 -t 1 k1 || true
         read -s -n 1 -t 1 k2 || true
@@ -85,16 +86,19 @@ function select_menu_item() {
 
     case "$keycode" in
     # cursor up, left: previous item
-    w | a | $'\e[A' | $'\e0A' | $'\e[D' | $'\e0D') ((((cursor > 0)) && ((cursor--)))) || true ;;
+    w | a | $'\e[A' | $'\e0A' | $'\e[D' | $'\e0D') [[ ((cursor > 0)) ]] && ((cursor--)) || ((cursor=${#_options[@]} - 1));;
+#    w | a | $'\e[A' | $'\e0A' | $'\e[D' | $'\e0D') [[ ((cursor > 0)) && $((cursor--)) || ((cursor=${#_options[@]}-1)) ]] || true ;;
     # cursor down, right: next item
-    s | d | $'\e[B' | $'\e0B' | $'\e[C' | $'\e0C') ((((cursor < ${#_options[@]} - 1)) && ((cursor++)))) || true ;;
-      # Home, PgUp keys: first item
+    s | d | $'\e[B' | $'\e0B' | $'\e[C' | $'\e0C') [[ ${cursor} < $((${#_options[@]} - 1)) ]] && cursor=$((cursor+1)) || cursor=0;;
+#    s | d | $'\e[B' | $'\e0B' | $'\e[C' | $'\e0C') [[ ((cursor < ${#_options[@]}-1)) && $((++cursor)) || ((cursor=0)) ]] || true;;
+    # Home, PgUp keys: first item
     $'\e[1~' | $'\e0H' | $'\e[H' | $'\e05~' | $'\e[5~') cursor=0 ;;
-      # End, PgDown keys: last item
+    # End, PgDown keys: last item
     $'\e[4~' | $'\e0F' | $'\e[F' | $'\e06~' | $'\e[6~') ((cursor = ${#_options[@]} - 1)) ;;
-      # q, carriage return: quit
+    # q, carriage return: quit
     q | '' | $'\e') echo "exit" && exit ;;
     esac
+
     # Redraw menu
     clear_menu
     draw_menu

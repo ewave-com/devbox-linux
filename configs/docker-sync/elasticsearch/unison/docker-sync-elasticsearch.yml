@@ -4,22 +4,18 @@ options:
     project_root: config_path
 
 syncs:
-    {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_node_modules_sync:
-        src: '{{DEVBOX_PROJECT_DIR}}/sysdumps/node_modules'
-        sync_strategy: 'native'         # Linux specific, WinOs / MacOs specific have 'unison' strategy
+    {{PROJECT_NAME}}_{{CONTAINER_ELASTICSEARCH_NAME}}_data_sync:
+        src: '{{DEVBOX_PROJECT_DIR}}/sysdumps/elasticsearch/data'
+        sync_strategy: 'unison'
         unison_image: eugenmayer/unison:2.51.3-4.12.0-AMD64
         sync_prefer: dest               # prefer container data
         watch_only: true                # Ewave custom option, skip initial sync expect precopy to run only background watch
-        sync_userid: 33                 # desired userid inside target project container
+        sync_userid: 1000               # desired userid inside target project container
         sync_args:
             - "-perms=0"
             - "-dontchmod=true"
             - "-fastcheck=true"
-            - "-fastercheckUNSAFE=true"
             - "-maxthreads=100"
             - "-ignorelocks=true"
             - "-numericids=false"
             - "-confirmbigdel=false"
-        sync_excludes_type: 'none'      # set 'none' explicitly otherwise default type 'Name' will be passed to sync_exclude patterns
-        sync_excludes:
-            - 'Path .staging'

@@ -91,7 +91,7 @@ function dotenv_set_param_value() {
       sed -i "s|^${_param_name}=.*|${_param_name}=${_param_value}|g" ${_env_filepath}
     fi
   else
-    echo -en "${_param_name}=${_param_value}\n" >>"${_env_filepath}"
+    printf "%s=%s\n" "${_param_name}" "${_param_value}" >>"${_env_filepath}"
   fi
 }
 
@@ -118,8 +118,8 @@ function replace_file_patterns_with_dotenv_params() {
     _param_name=$(echo "${_pattern}" | sed -E 's/[{}]//g')
 
     # read variable from exported shell variables if exists
-    if [[ ! -z "${_param_name+x}" ]]; then
-      _param_value="$(printenv ${_param_name})"
+    if [[ ! -z $(eval "echo \${${_param_name}+x}") ]]; then
+      eval _param_value="\$${_param_name}"
       replace_value_in_file "${_filepath}" "${_pattern}" "${_param_value}"
       continue
     fi

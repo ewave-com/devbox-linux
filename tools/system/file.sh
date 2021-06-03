@@ -42,21 +42,23 @@ function copy_path_with_project_fallback() {
   local _target_path=$2
   local _strict_mode=${3-"1"}
 
-  if [[ -f "${project_dir}/${_source_path}" || -d "${project_dir}/${_source_path}" ]]; then
-    copy_path "${project_dir}/${_source_path}" "${_target_path}"
-    return 0
-  fi
+  local _is_copied="0"
 
   if [[ -f "${devbox_root}/${_source_path}" || -d "${devbox_root}/${_source_path}" ]]; then
     copy_path "${devbox_root}/${_source_path}" "${_target_path}"
-    return 0
+    _is_copied="1"
+  fi
+
+  if [[ -f "${project_dir}/${_source_path}" || -d "${project_dir}/${_source_path}" ]]; then
+    copy_path "${project_dir}/${_source_path}" "${_target_path}"
+    _is_copied="1"
+  fi
+
+  if [[ "${_is_copied}" == 0 &&  "${_strict_mode}" == "1" ]]; then
+    show_error_message "Unable to copy file: source path '${devbox_root}/${_source_path}' does not exist! Alternative fallback path also not found: '${project_dir}/${_source_path}'"
+    exit 1
   else
-    if [[ "${_strict_mode}" == "1" ]]; then
-      show_error_message "Unable to copy file: source path '${devbox_root}/${_source_path}' does not exist! Alternative fallback path also not found: '${project_dir}/${_source_path}'"
-      exit 1
-    else
-      return 0
-    fi
+    return 0
   fi
 }
 
@@ -71,4 +73,7 @@ function replace_file_line_endings() {
   tr '\r\n' '\n' <"${_filepath}" >"${_filepath}.tmp"
   mv "${_filepath}.tmp" "${_filepath}"
 }
+
+# todo put univeral 'sed -i' function here per OS?
+
 ############################ Public functions end ############################

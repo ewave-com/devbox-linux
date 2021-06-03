@@ -2,7 +2,15 @@
 set -eu
 
 docker_sync_file=${1-""}
-devbox_root="$(realpath "$(dirname "${BASH_SOURCE[0]}")/../..")"
+# 'realpath' might be not installed
+if [[ ! -z "$(which realpath)" ]]; then
+  devbox_root="$(realpath "$(dirname "${BASH_SOURCE[0]}")/../..")"
+else
+  devbox_root=`dirname "$0"`
+  [[ "${devbox_root}" == "." ]] && devbox_root="${PWD}"
+  devbox_root="$(dirname "$(dirname "$(dirname "${devbox_root}")")")"
+fi
+export devbox_root
 
 if [[ -z "${devbox_root}" || ! -d "${devbox_root}" || -z "${docker_sync_file}" || ! -f "${docker_sync_file}" ]]; then
   echo "Unable to initialize docker-sync-health-checker. Exit."
@@ -84,8 +92,8 @@ function start_watch() {
     sleep 10
   done
 
-  echo "### Docker-sync restarting failed after ${attempt_no} attempts. ###" >>"${working_dir}/${sync_name}.log"
-  echo "### This case should be investigated. Please contact DevBox guys. ###" >>"${working_dir}/${sync_name}.log"
+  echo "[$(date)] ### Docker-sync restarting failed after ${attempt_no} attempts. ###" >>"${working_dir}/${sync_name}.log"
+  echo "[$(date)] ### This case should be investigated. Please contact DevBox guys. ###" >>"${working_dir}/${sync_name}.log"
 }
 
 function is_main_healthchecker_process() {
@@ -147,7 +155,7 @@ function handle_hanging_unison_proceses() {
           _cycle_possible_hanging_unison_hashes[${#_cycle_possible_hanging_unison_hashes[@]}]="${_unison_pid}:${_cycle_num}"
         else
           if [[ -n $(ps -eo pid | grep ${_unison_pid}) ]]; then
-            show_warning_message "Killing PID '${_unison_pid}' as its CPU over the threshold '${cpu_percentage_threshold}' for '${max_cycles_before_kill}' cycles"
+            show_warning_message "[$(date)] ### Killing PID '${_unison_pid}' as its CPU over the threshold '${cpu_percentage_threshold}' for '${max_cycles_before_kill}' cycles"
             # remove killed pid from the candidate list
             _tmp_hanging_unison_hashes=()
             for _index in "${!hanging_unison_hashes[@]}"; do
@@ -163,7 +171,7 @@ function handle_hanging_unison_proceses() {
         _cycle_possible_hanging_unison_hashes[${#_cycle_possible_hanging_unison_hashes[@]}]="${_unison_pid}:1"
       fi
     else
-      show_success_message "CPU utilization normalized for PID '${_unison_pid}', reset not required"
+      show_success_message "[$(date)] ### CPU utilization normalized for PID '${_unison_pid}', reset not required"
       # remove normalized pid from the candidate list
       _tmp_hanging_unison_hashes=()
         for _index in "${!hanging_unison_hashes[@]}"; do
