@@ -4,8 +4,12 @@
 require_once "${devbox_root}/tools/system/constants.sh"
 # import output functions (print messages)
 require_once "${devbox_root}/tools/system/output.sh"
+# import devbox state function
+require_once "${devbox_root}/tools/devbox/devbox-state.sh"
 # import infrastructure functions
 require_once "${devbox_root}/tools/docker/infrastructure.sh"
+# import docker image functions
+require_once "${devbox_root}/tools/docker/docker-image.sh"
 # import main project functions entrypoint
 require_once "${devbox_root}/tools/project/project-main.sh"
 # import common functions for all projects structure
@@ -157,5 +161,19 @@ function docker_destroy() {
   destroy_all_docker_services
 
   show_success_message "Docker data was successfully purged" "1"
+}
+
+function update_docker_images_if_required() {
+  if [[ "${docker_images_autoupdate}" == "0" ]]; then
+    return
+  fi
+
+  _last_updated_since=$(get_devbox_state_docker_images_updated_at_diff)
+  if [[ -z "${_last_updated_since}" || ${_last_updated_since} -gt 2592000 ]]; then # 2592000 = 30 days
+    show_success_message "Looking for docker image updates" "1"
+    refresh_existing_docker_images
+
+    set_devbox_state_docker_images_updated_at "$(date +%s)"
+  fi
 }
 ############################ Public functions end ############################

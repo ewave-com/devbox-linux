@@ -2,6 +2,7 @@
 
 require_once "${devbox_root}/tools/system/constants.sh"
 require_once "${devbox_root}/tools/system/output.sh"
+require_once "${devbox_root}/tools/system/file.sh"
 
 ############################ Public functions ############################
 
@@ -96,8 +97,8 @@ function install_docker_sync() {
 
   # sync one of docker-sync files with patched version
   _docker_sync_lib_sources_dir="$(dirname "$(gem which docker-sync)")"
-  _target_chsum=$(md5sum "${_docker_sync_lib_sources_dir}/docker-sync/sync_strategy/unison.rb" | awk -F' ' '{print $1}')
-  _source_chsum=$(md5sum "${devbox_root}/tools/bin/docker-sync/lib/docker-sync/sync_strategy/unison.rb" | awk -F' ' '{print $1}')
+  _target_chsum=$(get_file_md5_hash "${_docker_sync_lib_sources_dir}/docker-sync/sync_strategy/unison.rb")
+  _source_chsum=$(get_file_md5_hash "${devbox_root}/tools/bin/docker-sync/lib/docker-sync/sync_strategy/unison.rb")
   if [[ "${_target_chsum}" != "${_source_chsum}" ]]; then
     sudo cp -f "${devbox_root}/tools/bin/docker-sync/lib/docker-sync/sync_strategy/unison.rb" "${_docker_sync_lib_sources_dir}/docker-sync/sync_strategy/unison.rb"
   fi
@@ -119,7 +120,7 @@ function install_git() {
 function install_composer() {
   run_composer_installer() {
     # https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
-    composer_expected_checksum="$(curl https://composer.github.io/installer.sig)"
+    composer_expected_checksum="$(curl --silent https://composer.github.io/installer.sig)"
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     composer_actual_checksum="$(php -r "echo hash_file('sha384', 'composer-setup.php');")"
 
@@ -140,11 +141,11 @@ function install_composer() {
     _composer_version=$(echo "$(composer --no-plugins --version)" | grep -o -m 1 -E "^Composer version ([0-9.]+) " | sed 's/Composer version //' | tr -d ' ')
     _major_version="${_composer_version:0:1}"
 
-    if [[ "${_major_version}" == "1" && ! "$(printf '%s\n' "1.10.21" "${_compose_version}" | sort -V | head -n1)" == "1.10.21" ]]; then
+    if [[ "${_major_version}" == "1" && ! "$(printf '%s\n' "1.10.21" "${_composer_version}" | sort -V | head -n1)" == "1.10.21" ]]; then
       show_success_message "Your composer will be updated to the latest version"
       sudo apt-get remove -y composer >/dev/null
       _composer_version=''
-    elif [[ "${_major_version}" == "2" && ! "$(printf '%s\n' "2.0.12" "${_compose_version}" | sort -V | head -n1)" == "2.0.12" ]]; then
+    elif [[ "${_major_version}" == "2" && ! "$(printf '%s\n' "2.0.12" "${_composer_version}" | sort -V | head -n1)" == "2.0.12" ]]; then
       show_success_message "Your composer will be updated to the latest version"
       sudo apt-get remove -y composer >/dev/null
       _composer_version=''
@@ -162,8 +163,8 @@ function install_composer() {
     show_success_message "Running initial composer install command."
     # locally catch the possible composer error without application stopping
     set +e && _composer_output=$(COMPOSER="${devbox_root}/composer.json" composer install --quiet) && set -e
-  elif [[ "${composer_autoupdate}" == "1" && -n $(find "${devbox_root}/composer.lock" -mmin +604800) ]]; then
-    show_success_message "Running composer update command to refresh packages. Last run was performed a week ago. Please wait a few seconds"
+  elif [[ "${composer_autoupdate}" == "1" && -n $(find "${devbox_root}/composer.lock" -mmin +2592000) ]]; then # 2592000 = 30 days
+    show_success_message "Running composer update command to refresh packages. Last run was performed a month ago. Please wait a few seconds"
     set +e && _composer_output=$(COMPOSER="${devbox_root}/composer.json" composer update --quiet) && set -e
   fi
 
@@ -189,9 +190,16 @@ function install_extra_packages() {
 }
 
 function register_devbox_scripts_globally() {
-  sudo chmod ug+x "${devbox_root}/start-devbox.sh"
-  sudo chmod ug+x "${devbox_root}/down-devbox.sh"
-  sudo chmod ug+x "${devbox_root}/sync-actions.sh"
+  # check owner execute permissions
+  if [[ $(stat -c %A "${devbox_root}/start-devbox.sh" | cut -c4) != "x" ]]; then
+    sudo chmod ug+x "${devbox_root}/start-devbox.sh"
+  fi
+  if [[ $(stat -c %A "${devbox_root}/down-devbox.sh" | cut -c4) != "x" ]]; then
+    sudo chmod ug+x "${devbox_root}/down-devbox.sh"
+  fi
+  if [[ $(stat -c %A "${devbox_root}/sync-actions.sh" | cut -c4) != "x" ]]; then
+    sudo chmod ug+x "${devbox_root}/sync-actions.sh"
+  fi
 
   add_directory_to_env_path "${devbox_root}"
 }

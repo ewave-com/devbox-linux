@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-require_once "${devbox_root}/tools/system/config-replacer.sh"
 require_once "${devbox_root}/tools/system/file.sh"
 require_once "${devbox_root}/tools/system/output.sh"
 require_once "${devbox_root}/tools/project/project-dotenv.sh"
@@ -93,13 +92,8 @@ function prepare_website_configs() {
   else
     # remove sync mentioning from website volumes list
     _sync_name="${PROJECT_NAME}_${CONTAINER_WEB_NAME}_composer_cache_sync"
-    if [[ "${os_type}" == "macos" ]]; then
-      sed -i '' "/${_sync_name}\:\/var\/www\/\.composer/d" "${project_up_dir}/docker-compose-website.yml" # remove volume reference
-      sed -i '' "/${_sync_name}:/{N;d;}" "${project_up_dir}/docker-compose-website.yml"                   # remove external volume mentioning
-    elif [[ "${os_type}" == "linux" ]]; then
-      sed -i "/${_sync_name}\:\/var\/www\/\.composer/d" "${project_up_dir}/docker-compose-website.yml"    # remove volume reference
-      sed -i "/${_sync_name}:/{N;d;}" "${project_up_dir}/docker-compose-website.yml"                      # remove external volume mentioning
-    fi
+    sed_in_place "/${_sync_name}\:\/var\/www\/\.composer/d" "${project_up_dir}/docker-compose-website.yml" # remove volume reference
+    sed_in_place "/${_sync_name}:/{N;d;}" "${project_up_dir}/docker-compose-website.yml"                   # remove external volume mentioning
   fi
 
   # prepare node_modules sync or remove volume references if not required
@@ -109,13 +103,8 @@ function prepare_website_configs() {
   else
     # remove sync mentioning from website volumes list
     _sync_name="${PROJECT_NAME}_${CONTAINER_WEB_NAME}_node_modules_sync"
-    if [[ "${os_type}" == "macos" ]]; then
-      sed -i '' "/${_sync_name}\:\/var\/www\/node_modules_remote/d" "${project_up_dir}/docker-compose-website.yml" # remove volume reference
-      sed -i '' "/${_sync_name}:/{N;d;}" "${project_up_dir}/docker-compose-website.yml"                             # remove external volume mentioning
-    elif [[ "${os_type}" == "linux" ]]; then
-      sed -i "/${_sync_name}\:\/var\/www\/node_modules_remote/d" "${project_up_dir}/docker-compose-website.yml"    # remove volume reference
-      sed -i "/${_sync_name}:/{N;d;}" "${project_up_dir}/docker-compose-website.yml"                                # remove external volume mentioning
-    fi
+    sed_in_place "/${_sync_name}\:\/var\/www\/node_modules_remote/d" "${project_up_dir}/docker-compose-website.yml"  # remove volume reference
+    sed_in_place "/${_sync_name}:/{N;d;}" "${project_up_dir}/docker-compose-website.yml"                             # remove external volume mentioning
   fi
 
   prepare_website_nginx_configs

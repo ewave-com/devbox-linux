@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+require_once "${devbox_root}/tools/system/file.sh"
+require_once "${devbox_root}/tools/system/output.sh"
+
 export state_file_name="project.state"
 
 ############################ Public functions ############################
@@ -35,11 +38,7 @@ function set_state_dotenv_hash() {
   local _state_filepath=${2-"${project_up_dir}/${state_file_name}"}
 
   if [[ -z ${_value} ]]; then
-    if [[ "${os_type}" == "macos" ]]; then
-      _value=$(md5 -q "${project_dir}/.env")
-    elif [[ "${os_type}" == "linux" ]]; then
-      _value=$(md5sum "${project_dir}/.env" | awk -F' ' '{print $1}')
-    fi
+    _value=$(get_file_md5_hash "${project_dir}/.env")
   fi
 
   state_set_param_value "dotenv_hash" "${_value}" "${_state_filepath}"
@@ -143,11 +142,7 @@ function state_set_param_value() {
   local _param_presented
   _param_presented=$(state_has_param "${_param_name}" "${_state_filepath}")
   if [[ "${_param_presented}" != "0" ]]; then
-    if [[ "${os_type}" == "macos" ]]; then
-      sed -i '' "s|^${_param_name}=.*|${_param_name}=${_param_value}|g" ${_state_filepath}
-    elif [[ "${os_type}" == "linux" ]]; then
-      sed -i "s|^${_param_name}=.*|${_param_name}=${_param_value}|g" ${_state_filepath}
-    fi
+    sed_in_place "s|^${_param_name}=.*|${_param_name}=${_param_value}|g" "${_state_filepath}"
   else
     printf "%s=%s\n" "${_param_name}" "${_param_value}" >>"${_state_filepath}"
   fi

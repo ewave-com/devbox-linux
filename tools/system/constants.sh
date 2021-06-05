@@ -12,7 +12,15 @@ export host_user_group=$(id -g -n)
 
 export docker_compose_log_level=ERROR
 
+# update devbox vendor packages automatically (monthly)
 export composer_autoupdate="1"
+
+# update stored docker images with ':latest' tag automatically (monthly)
+export docker_images_autoupdate="1"
+# coma-separated list on skipped images to be refreshed automatically (e.g. from private storages)
+export docker_images_autoupdate_skip_images=""
+
+##################################################################################
 
 function get_os_type() {
   local _os_type
@@ -43,3 +51,9 @@ BLUE='\033[0;34m'
 WHITE='\033[1;37m'
 SET='\033[0m'
 #########################
+
+# if you need to override any parameters from this file, just create the file "${devbox_root}/constants-override.sh" and put required params there
+# variables will be overloaded
+if [[ -f "${devbox_root}/constants-override.sh" ]]; then
+  require_one "${devbox_root}/constants-override.sh"
+fi

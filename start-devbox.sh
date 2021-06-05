@@ -22,6 +22,7 @@ require_once "${devbox_root}/tools/menu/select-project.sh"
 cat ${devbox_root}/tools/print/logo.txt
 
 install_dependencies
+update_docker_images_if_required
 
 # You can pass project name as argument to start without additional selecting
 selected_project=${1-""}

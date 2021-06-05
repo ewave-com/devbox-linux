@@ -10,6 +10,7 @@ require_once "${devbox_root}/tools/docker/docker-sync.sh"
 require_once "${devbox_root}/tools/docker/docker.sh"
 require_once "${devbox_root}/tools/system/dotenv.sh"
 require_once "${devbox_root}/tools/system/hosts.sh"
+require_once "${devbox_root}/tools/system/file.sh"
 
 ############################ Public functions ############################
 
@@ -224,11 +225,7 @@ function is_simplified_start_available() {
     fi
 
     local _current_dotenv_hash
-    if [[ "${os_type}" == "macos" ]]; then
-      _current_dotenv_hash=$(md5 -q "${project_dir}/.env")
-    elif [[ "${os_type}" == "linux" ]]; then
-      _current_dotenv_hash=$(md5sum "${project_dir}/.env" | awk -F' ' '{print $1}')
-    fi
+    _current_dotenv_hash="$(get_file_md5_hash "${project_dir}/.env")"
 
     local _stored_dotenv_hash
     _stored_dotenv_hash=$(state_get_param_value "dotenv_hash")

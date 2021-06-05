@@ -2,8 +2,8 @@
 # info: actions with env file
 
 require_once "${devbox_root}/tools/system/constants.sh"
-require_once "${devbox_root}/tools/system/free-port.sh"
 require_once "${devbox_root}/tools/system/output.sh"
+require_once "${devbox_root}/tools/system/file.sh"
 
 ############################ Public functions ############################
 
@@ -85,11 +85,7 @@ function dotenv_set_param_value() {
   local _param_presented
   _param_presented=$(dotenv_has_param "${_param_name}" "${_env_filepath}")
   if [[ "${_param_presented}" != "0" ]]; then
-    if [[ "${os_type}" == "macos" ]]; then
-      sed -i '' "s|^${_param_name}=.*|${_param_name}=${_param_value}|g" ${_env_filepath}
-    elif [[ "${os_type}" == "linux" ]]; then
-      sed -i "s|^${_param_name}=.*|${_param_name}=${_param_value}|g" ${_env_filepath}
-    fi
+    sed_in_place "s|^${_param_name}=.*|${_param_name}=${_param_value}|g" "${_env_filepath}"
   else
     printf "%s=%s\n" "${_param_name}" "${_param_value}" >>"${_env_filepath}"
   fi

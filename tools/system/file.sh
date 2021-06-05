@@ -62,6 +62,29 @@ function copy_path_with_project_fallback() {
   fi
 }
 
+function replace_value_in_file() {
+  local _filepath=$1
+  local _needle=$2
+  local _replacement=$3
+
+  if [[ -z ${_filepath} ]]; then
+    show_error_message "Unable to replace config value at path '${_filepath}'. Path can not be empty."
+    exit 1
+  fi
+
+  if [[ ! -f ${_filepath} ]]; then
+    show_error_message "Unable to replace config value at path '${_filepath}'. Path does not exist! Needle '${_needle}', replacement '${_replacement}'"
+    exit 1
+  fi
+
+  if [[ -z ${_needle} ]]; then
+    show_error_message "Unable to replace config value at path '${_filepath}'. Needle can not be empty!"
+    exit 1
+  fi
+
+  sed_in_place "s|${_needle}|${_replacement}|g" ${_filepath}
+}
+
 # Replace '\r\n\' endings with '\n'
 function replace_file_line_endings() {
   local _filepath=${1-""}
@@ -73,4 +96,37 @@ function replace_file_line_endings() {
   tr '\r\n' '\n' <"${_filepath}" >"${_filepath}.tmp"
   mv "${_filepath}.tmp" "${_filepath}"
 }
+
+function get_file_md5_hash() {
+  local _filepath=${1-""}
+  if [[ ! -f "${_filepath}" ]]; then
+    show_error_message "Unable to retrieve md5 file hash. Target file doesn't exist at path '${_filepath}'."
+    exit 1
+  fi
+
+  if [[ "${os_type}" == "macos" ]]; then
+    _value=$(md5 -q "${_filepath}")
+  elif [[ "${os_type}" == "linux" ]]; then
+    _value=$(md5sum "${_filepath}" | awk -F' ' '{print $1}')
+  fi
+
+  echo "${_value}"
+}
+
+# just a wrapper method for different OSs to avoid different calls with 'if' syntax copying across scripts
+function sed_in_place() {
+  local _sed_expression=${1-""}
+  local _filepath=${2-""}
+
+  if [[ -z "${_sed_expression}" || -z "${_filepath}" || ! -f "${_filepath}" ]]; then
+    show_error_message "Unable to sed file in place. All params must be filled. Sed expression '${_sed_expression}', filepath '${_filepath}' given."
+  fi
+
+  if [[ "${os_type}" == "macos" ]]; then
+    sed -i '' "${_sed_expression}" "${_filepath}"
+  elif [[ "${os_type}" == "linux" ]]; then
+    sed -i "${_sed_expression}" "${_filepath}"
+  fi
+}
+
 ############################ Public functions end ############################
