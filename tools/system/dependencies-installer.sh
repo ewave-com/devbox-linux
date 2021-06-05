@@ -135,7 +135,23 @@ function install_composer() {
     return $RESULT
   }
 
-  if [ -z "$(which composer)" ]; then
+  local _composer_version=''
+  if [[ -n "$(which composer)" ]]; then
+    _composer_version=$(echo "$(composer --no-plugins --version)" | grep -o -m 1 -E "^Composer version ([0-9.]+) " | sed 's/Composer version //' | tr -d ' ')
+    _major_version="${_composer_version:0:1}"
+
+    if [[ "${_major_version}" == "1" && ! "$(printf '%s\n' "1.10.21" "${_compose_version}" | sort -V | head -n1)" == "1.10.21" ]]; then
+      show_success_message "Your composer will be updated to the latest version"
+      sudo apt-get remove -y composer >/dev/null
+      _composer_version=''
+    elif [[ "${_major_version}" == "2" && ! "$(printf '%s\n' "2.0.12" "${_compose_version}" | sort -V | head -n1)" == "2.0.12" ]]; then
+      show_success_message "Your composer will be updated to the latest version"
+      sudo apt-get remove -y composer >/dev/null
+      _composer_version=''
+    fi
+  fi
+
+  if [ -z "${_composer_version}" ]; then
     run_composer_installer
 
     set_flag_terminal_restart_required
