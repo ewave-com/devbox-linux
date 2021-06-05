@@ -2,7 +2,8 @@
 
 ```bash
 {devbox_root}
-    ├── configs
+    ├── _doc                                           # current dir
+    ├── configs                                        # devbox configuration file
     │   ├── bash                                       # available config providers for bash configs
     │   │   ├── akeneo                                      
     │   │   ├── default                                   
@@ -17,23 +18,24 @@
     │   │   ├── docker-compose-redis.yml
     │   │   ├── docker-compose-varnish.yml
     │   │   └── docker-compose-website.yml
-    │   ├── docker-images                              # Content of docker images with Dockerfiles
-    │   │   ├── devbox-nginx-php5.4
-    │   │   ├── ....
-    │   │   ├── devbox-nginx-php7.4
-    │   │   ├── devbox-nginx-reverse-proxy
-    │   │   └── READ.me
     │   ├── docker-sync                                # docker-sync configurations
+    │   │   ├── composer                               # available docker-sync config providers for composer cache
+    │   │   │   ├── global                                     
+    │   │   │   └── local
     │   │   ├── elasticsearch                          # available docker-sync config providers for elasticsearch
-    │   │   │   └── default                                     
+    │   │   │   ├── native                                     
+    │   │   │   └── unison                                     
     │   │   ├── mysql                                  # available docker-sync config providers for mysql
-    │   │   │   └── default
+    │   │   │   ├── native                                     
+    │   │   │   └── unison  
+    │   │   ├── node_modules                           # available docker-sync config providers for node_modules directory
+    │   │   │   └── default  
     │   │   └── website                                # available docker-sync config providers for website
-    │   │   │   ├── akeneo3
-    │   │   │   ├── akeneo4
-    │   │   │   ├── default
-    │   │   │   ├── magento1
-    │   │   │   └── magento2
+    │   │       ├── akeneo3
+    │   │       ├── akeneo4
+    │   │       ├── default
+    │   │       ├── magento1
+    │   │       └── magento2
     │   ├── infrastructure                             # available infrastructure services
     │   │   ├── docker-compose-adminer.yml                      
     │   │   ├── docker-compose-exim4.yml
@@ -60,16 +62,15 @@
     │   │   └── default
     │   ├── php                                        # available config providers for php configs
     │   │   └── default
-    │   ├── project-defaults.env
     │   ├── rabbitmq                                   # available config providers for website rabbitmq configs
     │   │   └── default
     │   ├── ssl                                        # available config providers for common ssl certificates
     │   │   ├── default
     │   │   └── readme.txt
-    │   └── varnish                                    # available config providers for website varnish configs
-    │       ├── default
-    │       └── magento2
-    ├── doc                                            # current dir
+    │   ├── varnish                                    # available config providers for website varnish configs
+    │   │   ├── default
+    │   │   └── magento2
+    │   └── project-defaults.env                       # base .env file with all default values
     ├── down-devbox.sh                                 # script entrypoint to stop or shutdown project 
     ├── projects                                       # directory for all projects sources
     │   ├── my_project_1                               # your project named my_project_1

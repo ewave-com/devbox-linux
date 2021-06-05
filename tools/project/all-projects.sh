@@ -43,7 +43,7 @@ function is_project_started() {
     return
   fi
 
-  if [[ $(is_state_file_exists "${_project_up_dir}/${state_file_name}") == "0" ]] || [[ $(get_state_last_project_status "${_project_up_dir}/${state_file_name}") != "started" ]]; then
+  if [[ $(is_state_file_exists "${_project_up_dir}") == "0" ]] || [[ $(get_state_last_project_status "${_project_up_dir}") != "started" ]]; then
     echo "0"
     return
   fi

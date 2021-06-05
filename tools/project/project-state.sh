@@ -8,6 +8,10 @@ export state_file_name="project.state"
 function is_state_file_exists() {
   local _state_filepath=${1-"${project_up_dir}/${state_file_name}"}
 
+  if [[ -d "${_state_filepath}" ]]; then
+    _state_filepath="${_state_filepath}/${state_file_name}"
+  fi
+
   if [[ -f "${_state_filepath}" ]]; then
     echo "1";
   fi
@@ -66,6 +70,10 @@ function set_state_last_project_status() {
 function remove_state_file() {
   local _state_filepath=${1-"${project_up_dir}/${state_file_name}"}
 
+  if [[ -d "${_state_filepath}" ]]; then
+    _state_filepath="${_state_filepath}/${state_file_name}"
+  fi
+
   if [[ -f "${_state_filepath}" ]]; then
     rm "${_state_filepath}"
   fi
@@ -79,6 +87,10 @@ function remove_state_file() {
 function state_has_param() {
   local _param_name=${1-""}
   local _state_filepath=${2-"${project_up_dir}/${state_file_name}"}
+
+  if [[ -d "${_state_filepath}" ]]; then
+    _state_filepath="${_state_filepath}/${state_file_name}"
+  fi
 
   init_state_file "${_state_filepath}"
   state_ensure_param_is_readable "${_param_name}" "${_state_filepath}"
@@ -95,11 +107,15 @@ function state_get_param_value() {
   local _param_name=$1
   local _state_filepath=${2-"${project_up_dir}/${state_file_name}"}
 
+  if [[ -d "${_state_filepath}" ]]; then
+    _state_filepath="${_state_filepath}/${state_file_name}"
+  fi
+
   local _param_value=''
 
   if [[ $(is_state_file_exists "${_state_filepath}") == "0" ]]; then
     echo "${_param_value}"
-    break;
+    return;
   fi
 
   state_ensure_param_is_readable "${_param_name}" "${_state_filepath}"
@@ -116,6 +132,10 @@ function state_set_param_value() {
   local _param_name=${1-""}
   local _param_value=${2-""}
   local _state_filepath=${3-"${project_up_dir}/${state_file_name}"}
+
+  if [[ -d "${_state_filepath}" ]]; then
+    _state_filepath="${_state_filepath}/${state_file_name}"
+  fi
 
   init_state_file "${_state_filepath}"
   state_ensure_param_is_readable "${_param_name}" "${_state_filepath}"
@@ -137,6 +157,10 @@ function state_set_param_value() {
 function init_state_file() {
   local _state_filepath=${1-"${project_up_dir}/${state_file_name}"}
 
+  if [[ -d "${_state_filepath}" ]]; then
+    _state_filepath="${_state_filepath}/${state_file_name}"
+  fi
+
   if [[ ! -f "${_state_filepath}" ]]; then
     touch "${_state_filepath}"
   fi
@@ -145,15 +169,19 @@ function init_state_file() {
 # check param name is presented and checked file exists
 function state_ensure_param_is_readable() {
   local _param_name=$1
-  local _status_filepath=${2-"${project_up_dir}/${state_file_name}"}
+  local _state_filepath=${2-"${project_up_dir}/${state_file_name}"}
+
+  if [[ -d "${_state_filepath}" ]]; then
+    _state_filepath="${_state_filepath}/${state_file_name}"
+  fi
 
   if [[ -z "${_param_name}" ]]; then
     show_error_message "Unable to read project state parameter. Param name cannot be empty"
     exit 1
   fi
 
-  if [[ -z "${_status_filepath}" || ! -f "${_status_filepath}" ]]; then
-    show_error_message "Unable to read project state param. State file does not exist at path '${_status_filepath}'."
+  if [[ -z "${_state_filepath}" || ! -f "${_state_filepath}" ]]; then
+    show_error_message "Unable to read project state param. State file does not exist at path '${_state_filepath}'."
     exit 1
   fi
 }

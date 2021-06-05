@@ -23,11 +23,9 @@ function start_project() {
     show_success_message "Start project using simplified strategy." "1"
   fi
 
-  set_state_last_project_status "starting"
+  if [[ "${_is_simplified_start_available}" == "0" ]]; then
+    set_state_last_project_status "starting"
 
-  if [[ "${_is_simplified_start_available}" == "1" ]]; then
-    dotenv_export_variables "${project_up_dir}/.env"
-  else
     show_success_message "Generating project file .env and variables" "2"
     prepare_project_dotenv_variables "1"
 
@@ -36,6 +34,12 @@ function start_project() {
 
     show_success_message "Preparing required project docker-up configs" "2"
     prepare_project_docker_up_configs
+  else
+    prepare_project_dotenv_variables "0"
+
+    ensure_exposed_container_ports_are_available "${project_up_dir}/.env"
+
+    set_state_last_project_status "starting"
   fi
 
   show_success_message "Preparing nginx-reverse-proxy configs" "2"
@@ -209,27 +213,27 @@ function init_selected_project() {
 function is_simplified_start_available() {
     if [[ "$(is_state_file_exists)" == "0" ]]; then
       echo "0"
-      exit;
       return
     fi
 
-    local _last_project_status="$(get_state_last_project_status)"
+    local _last_project_status
+    _last_project_status="$(get_state_last_project_status)"
     if [[ "${_last_project_status}" != "stopped" ]]; then
       echo "0"
-      exit;
       return
     fi
 
+    local _current_dotenv_hash
     if [[ "${os_type}" == "macos" ]]; then
-      local _current_dotenv_hash=$(md5 -q "${project_dir}/.env")
+      _current_dotenv_hash=$(md5 -q "${project_dir}/.env")
     elif [[ "${os_type}" == "linux" ]]; then
-      local _current_dotenv_hash=$(md5sum "${project_dir}/.env" | awk -F' ' '{print $1}')
+      _current_dotenv_hash=$(md5sum "${project_dir}/.env" | awk -F' ' '{print $1}')
     fi
 
-    local _stored_dotenv_hash=$(state_get_param_value "dotenv_hash")
-    if [[ "${_current_dotenv_hash}" != ${_stored_dotenv_hash} ]]; then
+    local _stored_dotenv_hash
+    _stored_dotenv_hash=$(state_get_param_value "dotenv_hash")
+    if [[ "${_current_dotenv_hash}" != "${_stored_dotenv_hash}" ]]; then
       echo "0"
-      exit;
       return
     fi
 

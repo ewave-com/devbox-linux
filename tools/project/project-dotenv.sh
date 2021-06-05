@@ -131,6 +131,44 @@ function merge_defaults() {
   done
 }
 
+# check if dynamic ports are available to be exposed, used on simplified start with existing .env
+function ensure_exposed_container_ports_are_available() {
+  local _env_filepath=${1-"${project_up_dir}/.env"}
+
+  current_env_filepath="${_env_filepath}"
+
+  # ensure mysql external port is available to be exposed or compute a free one
+  local _mysql_enable
+  _mysql_enable=$(dotenv_get_param_value 'MYSQL_ENABLE')
+  if [[ "${_mysql_enable}" == 'yes' ]]; then
+    local _configured_mysql_port
+    _configured_mysql_port=$(dotenv_get_param_value 'CONTAINER_MYSQL_PORT')
+    if [[ -n ${_configured_mysql_port} ]]; then
+      ensure_mysql_port_is_available ${_configured_mysql_port}
+    fi
+  fi
+
+  # ensure elasticsearch external port is available to be exposed or compute a free one
+  local _es_enable
+  _es_enable=$(dotenv_get_param_value 'ELASTICSEARCH_ENABLE')
+  if [[ "${_es_enable}" == "yes" ]]; then
+    local _configured_es_port
+    _configured_es_port=$(dotenv_get_param_value 'CONTAINER_ELASTICSEARCH_PORT')
+    if [[ -n ${_configured_es_port} ]]; then
+      ensure_elasticsearch_port_is_available ${_configured_es_port}
+    fi
+  fi
+
+  # ensure website ssh external port is available to be exposed or compute a free one
+  local _configured_ssh_port
+  _configured_ssh_port=$(dotenv_get_param_value 'CONTAINER_WEB_SSH_PORT')
+  if [[ -n ${_configured_ssh_port} ]]; then
+    ensure_website_ssh_port_is_available ${_configured_ssh_port}
+  fi
+
+  current_env_filepath=""
+}
+
 # add comupted params like dynamic ports or hosts
 function add_computed_params() {
   local _env_filepath=${1-"${project_up_dir}/.env"}

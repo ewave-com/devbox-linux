@@ -12,7 +12,7 @@ TODO complete changelog with all changes
     - Added fallback logic for project configs. Now you can override project specific config files. You need just to copy required config file structure from ${devbox_root}/configs to ${project_dir}/configs.
       You need just to copy required config file structure from ${devbox_root}/configs to ${project_dir}/configs. They will be used instead of global config file of certain config provider.
       For example "./configs/mysql/default/conf.d/custom.cnf" -> "./projects/my_project/configs/mysql/default/conf.d/custom.cnf"
-Added documentation for devbox and platform-tools configuration files and features. See [README.md](README.md)
+- Added documentation for devbox and platform-tools configuration files and features. See [README.md](README.md)
 - Files syncing [Windows/MacOS]:
     - Introduced docker-sync synchronization for mysql, elasticsearch, website data storages, now several independent syncs are available for project
       Each critical data source is mounted to project containers and has separate containerized volume with own supervisor

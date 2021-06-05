@@ -73,6 +73,7 @@ fi
 alias platform-tools="php {{TOOLS_PROVIDER_REMOTE_PATH}}/{{TOOLS_PROVIDER_ENTRYPOINT}}"
 
 # Common application aliases
+alias ll="ls -la"
 alias coperm="platform-tools core:setup:permissions"
 
 #Akeneo aliases

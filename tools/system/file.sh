@@ -73,7 +73,4 @@ function replace_file_line_endings() {
   tr '\r\n' '\n' <"${_filepath}" >"${_filepath}.tmp"
   mv "${_filepath}.tmp" "${_filepath}"
 }
-
-# todo put univeral 'sed -i' function here per OS?
-
 ############################ Public functions end ############################
