@@ -96,7 +96,13 @@ function install_docker_sync() {
   fi
 
   # sync one of docker-sync files with patched version
-  _docker_sync_lib_sources_dir="$(dirname "$(gem which docker-sync)")"
+  local _docker_sync_lib_sources_dir=""
+  [[ -f $(gem which docker-sync) ]] && _docker_sync_lib_sources_dir="$(dirname "$(gem which docker-sync)")" || true
+  if [[ ! -d "${_docker_sync_lib_sources_dir}" ]]; then
+    show_error_message "Docker-sync package was not installed. Please try to reinstall it or contact DevBox developers."
+    exit
+  fi
+
   _target_chsum=$(get_file_md5_hash "${_docker_sync_lib_sources_dir}/docker-sync/sync_strategy/unison.rb")
   _source_chsum=$(get_file_md5_hash "${devbox_root}/tools/bin/docker-sync/lib/docker-sync/sync_strategy/unison.rb")
   if [[ "${_target_chsum}" != "${_source_chsum}" ]]; then
