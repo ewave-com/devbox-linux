@@ -33,10 +33,12 @@ function docker_sync_start() {
 
   # start syncs using explicit docker-sync sync name to have separate daemon pid file and logging for each sync
   for _sync_name in ${_sync_names}; do
-    if [[ "$(is_docker_container_exist '${_sync_name}')" == "0" ]]; then
-      show_success_message "Starting initial synchronization for sync name '${_sync_name}'. Please wait" "3"
-    else
-      show_success_message "Starting background synchronization for sync name '${_sync_name}'" "3"
+    if [[ "${_sync_strategy}" != "native" ]]; then
+      if [[ "$(is_docker_container_exist '${_sync_name}')" == "0" ]]; then
+        show_success_message "Starting initial synchronization for sync name '${_sync_name}'. Please wait" "3"
+      else
+        show_success_message "Starting background synchronization for sync name '${_sync_name}'" "3"
+      fi
     fi
 
     if [[ ! -f "${_working_dir}/${_sync_name}.log" ]]; then
@@ -80,7 +82,9 @@ function docker_sync_stop() {
   local _sync_strategy
   _sync_strategy="$(get_config_file_sync_strategy ${_config_file})"
 
-  show_success_message "Stopping docker-sync for all syncs from config '$(basename ${_config_file})'" "3"
+  if [[ "${_sync_strategy}" != "native" ]]; then
+    show_success_message "Stopping docker-sync for all syncs from config '$(basename ${_config_file})'" "3"
+  fi
 
   # terminate health-checker background processes
   if [[ "${_kill_service_processes}" == "1" && "${_sync_strategy}" != "native" ]]; then
@@ -122,8 +126,13 @@ function docker_sync_clean() {
   local _working_dir
   _working_dir=$(get_config_file_working_dir "${_config_file}")
 
+  local _sync_strategy
+  _sync_strategy="$(get_config_file_sync_strategy ${_config_file})"
+
   for _sync_name in ${_sync_names}; do
-    show_success_message "Cleaning docker-sync for sync name '${_sync_name}'" "3"
+    if [[ "${_sync_strategy}" != "native" ]]; then
+      show_success_message "Cleaning docker-sync for sync name '${_sync_name}'" "3"
+    fi
 
     docker-sync clean --config="${_config_file}" --sync-name="${_sync_name}" >>"${_working_dir}/${_sync_name}.log"
 
