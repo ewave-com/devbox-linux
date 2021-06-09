@@ -5,6 +5,7 @@ services:
         image: {{CONTAINER_VARNISH_IMAGE}}:{{CONTAINER_VARNISH_VERSION}}
         container_name: {{PROJECT_NAME}}_{{CONTAINER_VARNISH_NAME}}
         restart: unless-stopped
+        depends_on: web                                                 # varnish requires active backend to start
         volumes:
             - ./configs/varnish/default.vcl:/etc/varnish/default.vcl
         networks:
