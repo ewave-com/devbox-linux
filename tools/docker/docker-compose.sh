@@ -137,7 +137,11 @@ function docker_compose_up_all_directory_services() {
     exit 1
   fi
 
-  for _project_compose_filepath in $(ls "${_working_directory}" | grep "docker-compose-.*.yml" | awk '{ print $1 }'); do
+  if [[ -f "${_working_directory}/docker-compose-website.yml" ]]; then
+    docker_compose_up "${_working_directory}/docker-compose-website.yml" "${_env_filepath}" "${docker_compose_log_level}"
+  fi
+
+  for _project_compose_filepath in $(ls "${_working_directory}" | grep "docker-compose-.*.yml" | grep -v "docker-compose-website.yml" | awk '{ print $1 }'); do
     docker_compose_up "${_working_directory}/${_project_compose_filepath}" "${_env_filepath}" "${docker_compose_log_level}"
   done
 }
