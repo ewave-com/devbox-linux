@@ -9,14 +9,14 @@ xdebug.idekey = PHPSTORM
 xdebug.remote_handler = dbgp
 xdebug.remote_autostart = 0
 xdebug.remote_mode = req
-xdebug.remote_log = "${HOME}/xdebug.log"
+xdebug.remote_log = "/var/www/xdebug.log"
 ############### Xdebug 2.0 config End ###################
 
 ############### Xdebug 3.0 config ###################
 xdebug.mode=debug,develop
 xdebug.start_with_request = trigger
 xdebug.trigger_value=PHPSTORM
-xdebug.log = "${HOME}/xdebug.log"
+xdebug.log = "/var/www/xdebug.log"
 xdebug.log_level = 3
 xdebug.discover_client_host=1
 xdebug.client_host = {{WEBSITE_PHP_XDEBUG_HOST}}
