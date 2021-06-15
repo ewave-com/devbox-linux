@@ -53,7 +53,7 @@ function is_project_started() {
   local _has_main_dotenv_file
   _has_main_dotenv_file=$([[ -f "${_project_up_dir}/.env" ]] && echo "1" || echo "0")
   local _has_project_running_containers
-  _has_project_running_containers=$([[ "${_fast_check}" == "0" ]] && echo $(is_docker_container_running "${_dotenv_project_name}_") || echo "1")
+  _has_project_running_containers=$([[ "${_fast_check}" == "0" ]] && echo $(is_docker_container_running "${_dotenv_project_name}_" "0") || echo "1")
   local _docker_files_count
   _docker_files_count=$(find "${_project_up_dir}" -mindepth 1 -maxdepth 1 -name "docker-*.yml" | awk '{print length}')
   local _config_dirs_count

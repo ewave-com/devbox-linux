@@ -7,10 +7,15 @@ require_once "${devbox_root}/tools/system/output.sh"
 
 function is_docker_container_running() {
   local _container_name=${1-''}
+  local _find_exact_match=${2-'1'}
 
   if [[ -z "$_container_name" ]]; then
     show_error_message "Unable to check active docker container. Container name cannot be empty."
     exit 1
+  fi
+
+  if [[ "${_find_exact_match}" == "1" ]]; then
+    _container_name="^${_container_name}$"
   fi
 
   if [[ ! -z $(docker ps -a --filter="name=${_container_name}" --filter="status=running" --format="{{.Names}}") ]]; then
@@ -22,10 +27,15 @@ function is_docker_container_running() {
 
 function is_docker_container_exist() {
   local _container_name=${1-''}
+  local _find_exact_match=${2-'1'}
 
   if [[ -z "$_container_name" ]]; then
     show_error_message "Unable to check existing docker container. Container name cannot be empty."
     exit 1
+  fi
+
+  if [[ "${_find_exact_match}" == "1" ]]; then
+    _container_name="^${_container_name}$"
   fi
 
   if [[ ! -z $(docker ps -a --filter="name=${_container_name}" --format="{{.Names}}") ]]; then
@@ -37,10 +47,15 @@ function is_docker_container_exist() {
 
 function stop_container_by_name() {
   local _container_name=${1-''}
+  local _find_exact_match=${2-'1'}
 
   if [[ -z "$_container_name" ]]; then
     show_error_message "Unable to stop docker container. Container name cannot be empty."
     exit 1
+  fi
+
+  if [[ "${_find_exact_match}" == "1" ]]; then
+    _container_name="^${_container_name}$"
   fi
 
   docker stop $(docker ps -q --filter="name=${_container_name}") --time 10 >/dev/null
@@ -48,11 +63,16 @@ function stop_container_by_name() {
 
 function kill_container_by_name() {
   local _container_name=${1-''}
-  local _signal=${3-"SIGKILL"}
+  local _signal=${2-"SIGKILL"}
+  local _find_exact_match=${3-'1'}
 
-  if [[ -z "$_container_name" ]]; then
+  if [[ -z "${_container_name}" ]]; then
     show_error_message "Unable to kill docker container. Container name cannot be empty."
     exit 1
+  fi
+
+  if [[ "${_find_exact_match}" == "1" ]]; then
+    _container_name="^${_container_name}$"
   fi
 
   docker kill $(docker ps -aq --filter="name=${_container_name}") -s ${_signal} >/dev/null
@@ -61,10 +81,15 @@ function kill_container_by_name() {
 function rm_container_by_name() {
   local _container_name=${1-''}
   local _force=${2-"0"}
+  local _find_exact_match=${3-'1'}
 
   if [[ -z "$_container_name" ]]; then
     show_error_message "Unable to remove docker container. Container name cannot be empty."
     exit 1
+  fi
+
+  if [[ "${_find_exact_match}" == "1" ]]; then
+    _container_name="^${_container_name}$"
   fi
 
   if [[ "${_force}" == "1" ]]; then

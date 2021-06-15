@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # info: actions with env file
 
+require_once "${devbox_root}/tools/docker/docker.sh"
 require_once "${devbox_root}/tools/system/constants.sh"
 require_once "${devbox_root}/tools/system/output.sh"
 require_once "${devbox_root}/tools/system/file.sh"
@@ -173,6 +174,8 @@ function ensure_exposed_container_ports_are_available() {
 function add_computed_params() {
   local _env_filepath=${1-"${project_up_dir}/.env"}
 
+  local _project_name=$(dotenv_get_param_value 'PROJECT_NAME')
+
   # ensure mysql external port is available to be exposed or compute a free one
   local _mysql_enable
   _mysql_enable=$(dotenv_get_param_value 'MYSQL_ENABLE')
@@ -183,7 +186,13 @@ function add_computed_params() {
       ensure_mysql_port_is_available ${_configured_mysql_port}
     else
       local _computed_mysql_port
-      _computed_mysql_port=$(get_available_mysql_port)
+      _mysql_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_MYSQL_NAME')"
+      if [[ $(is_docker_container_exist "${_mysql_container_name}") == "1" ]]; then
+        _computed_mysql_port=$(get_mysql_port_from_existing_container "${_mysql_container_name}")
+      else
+        _computed_mysql_port=$(get_available_mysql_port)
+      fi
+
       ensure_mysql_port_is_available ${_computed_mysql_port}
       dotenv_set_param_value 'CONTAINER_MYSQL_PORT' ${_computed_mysql_port}
     fi
@@ -199,7 +208,13 @@ function add_computed_params() {
       ensure_elasticsearch_port_is_available ${_configured_es_port}
     else
       local _computed_es_port
-      _computed_es_port=$(get_available_elasticsearch_port)
+      _es_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_ELASTICSEARCH_NAME')"
+      if [[ $(is_docker_container_exist "${_es_container_name}") == "1" ]]; then
+        _computed_es_port=$(get_elasticsearch_port_from_existing_container "${_es_container_name}")
+      else
+        _computed_es_port=$(get_available_elasticsearch_port)
+      fi
+
       ensure_elasticsearch_port_is_available ${_computed_es_port}
       dotenv_set_param_value 'CONTAINER_ELASTICSEARCH_PORT' ${_computed_es_port}
     fi
@@ -212,7 +227,13 @@ function add_computed_params() {
     ensure_website_ssh_port_is_available ${_configured_ssh_port}
   else
     local _computed_ssh_port
-    _computed_ssh_port=$(get_available_website_ssh_port)
+    _web_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_WEB_NAME')"
+    if [[ $(is_docker_container_exist "${_web_container_name}") == "1" ]]; then
+      _computed_ssh_port=$(get_website_ssh_port_from_existing_container "${_web_container_name}")
+    else
+      _computed_ssh_port=$(get_available_website_ssh_port)
+    fi
+
     ensure_website_ssh_port_is_available ${_computed_ssh_port}
     dotenv_set_param_value 'CONTAINER_WEB_SSH_PORT' ${_computed_ssh_port}
   fi
