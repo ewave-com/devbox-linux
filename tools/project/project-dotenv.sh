@@ -183,18 +183,22 @@ function add_computed_params() {
     local _configured_mysql_port
     _configured_mysql_port=$(dotenv_get_param_value 'CONTAINER_MYSQL_PORT')
     if [[ -n ${_configured_mysql_port} ]]; then
-      ensure_mysql_port_is_available ${_configured_mysql_port}
+      ensure_mysql_port_is_available "${_configured_mysql_port}"
     else
       local _computed_mysql_port
       _mysql_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_MYSQL_NAME')"
-      if [[ $(is_docker_container_exist "${_mysql_container_name}") == "1" ]]; then
+      local _mysql_container_state
+      _mysql_container_state=$(get_docker_container_state "${_mysql_container_name}")
+      if [[ ! -z "${_mysql_container_state}" ]]; then
         _computed_mysql_port=$(get_mysql_port_from_existing_container "${_mysql_container_name}")
+        if [[ "${_mysql_container_state}" != "running" ]]; then
+          ensure_mysql_port_is_available "${_computed_mysql_port}"
+        fi
       else
         _computed_mysql_port=$(get_available_mysql_port)
       fi
 
-      ensure_mysql_port_is_available ${_computed_mysql_port}
-      dotenv_set_param_value 'CONTAINER_MYSQL_PORT' ${_computed_mysql_port}
+      dotenv_set_param_value 'CONTAINER_MYSQL_PORT' "${_computed_mysql_port}"
     fi
   fi
 
@@ -205,18 +209,23 @@ function add_computed_params() {
     local _configured_es_port
     _configured_es_port=$(dotenv_get_param_value 'CONTAINER_ELASTICSEARCH_PORT')
     if [[ -n ${_configured_es_port} ]]; then
-      ensure_elasticsearch_port_is_available ${_configured_es_port}
+      ensure_elasticsearch_port_is_available "${_configured_es_port}"
     else
       local _computed_es_port
       _es_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_ELASTICSEARCH_NAME')"
-      if [[ $(is_docker_container_exist "${_es_container_name}") == "1" ]]; then
+      local _es_container_state
+      _es_container_state=$(get_docker_container_state "${_es_container_name}")
+
+      if [[ ! -z "${_es_container_state}" ]]; then
         _computed_es_port=$(get_elasticsearch_port_from_existing_container "${_es_container_name}")
+        if [[ "${_es_container_state}" != "running" ]]; then
+          ensure_elasticsearch_port_is_available "${_computed_es_port}"
+        fi
       else
         _computed_es_port=$(get_available_elasticsearch_port)
       fi
 
-      ensure_elasticsearch_port_is_available ${_computed_es_port}
-      dotenv_set_param_value 'CONTAINER_ELASTICSEARCH_PORT' ${_computed_es_port}
+      dotenv_set_param_value 'CONTAINER_ELASTICSEARCH_PORT' "${_computed_es_port}"
     fi
   fi
 
@@ -224,18 +233,23 @@ function add_computed_params() {
   local _configured_ssh_port
   _configured_ssh_port=$(dotenv_get_param_value 'CONTAINER_WEB_SSH_PORT')
   if [[ -n ${_configured_ssh_port} ]]; then
-    ensure_website_ssh_port_is_available ${_configured_ssh_port}
+    ensure_website_ssh_port_is_available "${_configured_ssh_port}"
   else
     local _computed_ssh_port
     _web_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_WEB_NAME')"
-    if [[ $(is_docker_container_exist "${_web_container_name}") == "1" ]]; then
+    local _web_container_state
+    _web_container_state=$(get_docker_container_state "${_web_container_name}")
+
+    if [[ ! -z "${_web_container_state}" ]]; then
       _computed_ssh_port=$(get_website_ssh_port_from_existing_container "${_web_container_name}")
+      if [[ "${_es_container_state}" != "running" ]]; then
+        ensure_website_ssh_port_is_available "${_computed_ssh_port}"
+      fi
     else
       _computed_ssh_port=$(get_available_website_ssh_port)
     fi
 
-    ensure_website_ssh_port_is_available ${_computed_ssh_port}
-    dotenv_set_param_value 'CONTAINER_WEB_SSH_PORT' ${_computed_ssh_port}
+    dotenv_set_param_value 'CONTAINER_WEB_SSH_PORT' "${_computed_ssh_port}"
   fi
 
   # fill WEBSITE_PHP_XDEBUG_HOST if empty

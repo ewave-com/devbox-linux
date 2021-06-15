@@ -5,6 +5,20 @@ require_once "${devbox_root}/tools/system/output.sh"
 
 ############################ Public functions ############################
 
+function get_docker_container_state() {
+  local _container_name=${1-''}
+
+  if [[ -z "$_container_name" ]]; then
+    show_error_message "Unable to get docker container state. Container name cannot be empty."
+    exit 1
+  fi
+
+  local _result
+  _result="$(docker ps -a --filter='name=^${_container_name}$' --format='{{.State}}')"
+
+  echo "${_result}"
+}
+
 function is_docker_container_running() {
   local _container_name=${1-''}
   local _find_exact_match=${2-'1'}
