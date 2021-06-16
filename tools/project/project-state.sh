@@ -156,6 +156,10 @@ function init_state_file() {
     _state_filepath="${_state_filepath}/${state_file_name}"
   fi
 
+  if [[ ! -d "$(dirname "${_state_filepath}")" ]]; then
+    mkdir -p "$(dirname "${_state_filepath}")"
+  fi
+
   if [[ ! -f "${_state_filepath}" ]]; then
     touch "${_state_filepath}"
   fi

@@ -86,10 +86,10 @@ function select_menu_item() {
 
     case "$keycode" in
     # cursor up, left: previous item
-    w | a | $'\e[A' | $'\e0A' | $'\e[D' | $'\e0D') [[ ((cursor > 0)) ]] && ((cursor--)) || ((cursor=${#_options[@]} - 1));;
+    w | a | $'\e[A' | $'\e0A' | $'\e[D' | $'\e0D') [[ ((cursor -gt 0)) ]] && ((cursor--)) || ((cursor=${#_options[@]} - 1));;
 #    w | a | $'\e[A' | $'\e0A' | $'\e[D' | $'\e0D') [[ ((cursor > 0)) && $((cursor--)) || ((cursor=${#_options[@]}-1)) ]] || true ;;
     # cursor down, right: next item
-    s | d | $'\e[B' | $'\e0B' | $'\e[C' | $'\e0C') [[ ${cursor} < $((${#_options[@]} - 1)) ]] && cursor=$((cursor+1)) || cursor=0;;
+    s | d | $'\e[B' | $'\e0B' | $'\e[C' | $'\e0C') [[ ${cursor} -lt $((${#_options[@]} - 1)) ]] && cursor=$((cursor+1)) || cursor=0;;
 #    s | d | $'\e[B' | $'\e0B' | $'\e[C' | $'\e0C') [[ ((cursor < ${#_options[@]}-1)) && $((++cursor)) || ((cursor=0)) ]] || true;;
     # Home, PgUp keys: first item
     $'\e[1~' | $'\e0H' | $'\e[H' | $'\e05~' | $'\e[5~') cursor=0 ;;
