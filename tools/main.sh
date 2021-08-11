@@ -1,84 +1,179 @@
-#!/bin/bash
-#DEBUG_MODE=$("> /dev/null 2>&1") 
-# List constants
-xdebug_port=9001
-docker_compose_log_level=ERROR
-export devbox_root=$(pwd)
-devbox_infra="$devbox_root/configs/docker/infrastructure"
-#Server IP for XDEBUG
-server_ip=$(ip addr show docker0 | grep -Po 'inet \K[\d.]+')
-#Depricated 
-#Waiting https://github.com/docker/for-linux/issues/264
-#server_ip=172.17.0.1
+#!/usr/bin/env bash
 
-# Set color variable
-DARKGRAY='\033[1;30m'
-RED='\033[0;31m'
-LIGHTRED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-LIGHTPURPLE='\033[1;35m'
-CYAN='\033[0;36m'
-WHITE='\033[1;37m'
-SET='\033[0m'
-#########################
+# import global variables
+require_once "${devbox_root}/tools/system/constants.sh"
+# import output functions (print messages)
+require_once "${devbox_root}/tools/system/output.sh"
+# import devbox state function
+require_once "${devbox_root}/tools/devbox/devbox-state.sh"
+# import infrastructure functions
+require_once "${devbox_root}/tools/docker/infrastructure.sh"
+# import docker image functions
+require_once "${devbox_root}/tools/docker/docker-image.sh"
+# import main project functions entrypoint
+require_once "${devbox_root}/tools/project/project-main.sh"
+# import common functions for all projects structure
+require_once "${devbox_root}/tools/project/all-projects.sh"
+# import platform-tools functions
+require_once "${devbox_root}/tools/project/platform-tools.sh"
+# import functions to show project information after start
+require_once "${devbox_root}/tools/print/print-project-info.sh"
 
-# Function which find projects in folder
-list_projects(){
-echo "----------------------------------------------"
-echo -e " * * * * * * * $GREEN Select project $SET* * * * * * * * "
-echo "----------------------------------------------"
-PS3='Please input number  --->:'
-list="$(ls "./projects" | sed 's/ /£/'| grep -v ".txt") Exit"
-select project_folder in $list
-do
-  if [ "$project_folder" = "Exit" ] #if user selects Exit, then exit the program
-    then
-      exit 0
-    elif [ -n "$project_folder" ] #if name is valid, shows the files inside
-    then
-      break
-    else #if the number of the choice given by user is wrong, exit
-      echo "Invalid choice ($REPLY)!"
+############################ Public functions ############################
+
+function start_devbox_project() {
+  local _selected_project=${1-""}
+
+  show_success_message "Starting DevBox project '${_selected_project}'" "1"
+
+  ensure_project_configured ${_selected_project}
+  if [[ "$(is_project_started ${_selected_project})" == "1" ]]; then
+    show_warning_message "Project '${_selected_project}' is already started."
+    show_warning_message "Please ensure selected project is correct, or stop it and try to start again."
+    exit 1
   fi
-done
 
-if [ ! -f  ./projects/"$project_folder"/.env ]; then
-  echo -e "$RED File .ENV not found! Please check! $SET"
-  exit 0
-fi
+  # initialize basic project variables and directories
+  init_selected_project "${_selected_project}"
+
+  show_success_message "Starting common infrastructure." "1"
+  # Start common infra services, e.g. portainer, nginx-reverse-proxy, mailer, etc.
+  dotenv_export_variables "${dotenv_infra_filepath}" # actually required only to display project info
+  start_infrastructure "${dotenv_infra_filepath}"
+
+  show_success_message "Starting project" "1"
+  # Prepare all required configs and start project services
+  start_project
+
+  show_success_message "Project '${_selected_project}' was successfully started" "1"
+
+  # Print final project info
+  print_info
+
+  # Run platform tools menu inside web-container
+  run_platform_tools
+
+  # Unset all used variables
+  dotenv_unset_variables "${dotenv_infra_filepath}"
+  dotenv_unset_variables "${project_up_dir}/.env"
 }
 
-count_up_project_containers (){
-count_containers=$(sudo docker ps -a | grep "$PROJECT_NAME" | wc -l)
-if [ $count_containers -ne 0  ]; then
-  echo -e "$RED Containers form project "$PROJECT_NAME" is running now $SET"
-  echo -e "$RED You cann't run already running containers $SET"
-  unset_env
-  exit 0
-fi
+function stop_devbox_project() {
+  local _selected_project=${1-""}
+
+  ensure_project_configured ${_selected_project}
+  if [[ "$(is_project_started ${_selected_project})" != "1" ]]; then
+    show_warning_message "DevBox project '${_selected_project}' is already stopped" "1"
+    return 0
+  fi
+
+  show_success_message "Stopping DevBox project '${_selected_project}'" "1"
+
+  # initialize basic project variables and directories
+  init_selected_project "${_selected_project}"
+
+  stop_current_project
+
+  show_success_message "Project '${_selected_project}' was successfully stopped" "1"
 }
 
+function down_devbox_project() {
+  local _selected_project=${1-""}
 
+  show_success_message "Downing DevBox project '${_selected_project}'" "1"
 
-stop_menu () {
-while :
-  do
-  echo "----------------------------------------------"
-  echo -e " * * * * * * * * $GREEN Stop menu $SET * * * * * * * * * "
-  echo "----------------------------------------------"
-  echo "[1] Stop ONE project "
-  echo "[2] Stop ALL projects"
-  echo "[0] Exit/stop"
-  echo "----------------------------------------------"
-  echo -n "Enter your menu choice [1,2 or 0]:"
-  read point
-  case $point in
-    1) list_projects  ; set_env ; stop_project ; unset_env ;  break ;;
-    2) stop_all_projects ; break ;;
-    0) exit 0 ;;
-   esac
-done
+  # initialize basic project variables and directories
+  init_selected_project "${_selected_project}"
+
+  down_current_project
+
+  show_success_message "Project '${_selected_project}' was successfully downed" "1"
 }
+
+function down_and_clean_devbox_project() {
+  local _selected_project=${1-""}
+
+  show_success_message "Downing and cleaning DevBox project '${_selected_project}'" "1"
+
+  # initialize basic project variables and directories
+  init_selected_project "${_selected_project}"
+
+  down_and_clean_current_project
+
+  show_success_message "Project '${_selected_project}' was successfully downed and cleaned" "1"
+}
+
+function stop_devbox_all() {
+  show_success_message "Stopping all DevBox projects" "1"
+
+  # Stop all project containers
+  for _selected_project in $(get_project_list "\n"); do
+    if [[ "$(is_project_configured ${_selected_project})" == "1" ]]; then
+      stop_devbox_project "${_selected_project}"
+    fi
+  done
+
+  show_success_message "Stopping common infrastructure." "1"
+  # Stop common infrastructure services images
+  stop_infrastructure "${dotenv_infra_filepath}"
+
+  show_success_message "DevBox was successfully stopped" "1"
+}
+
+function down_devbox_all() {
+  show_success_message "Downing and cleaning all DevBox projects" "1"
+
+  # Stop all project containers
+  for _selected_project in $(get_project_list "\n"); do
+    if [[ "$(is_project_configured ${_selected_project})" == "1" ]]; then
+      down_devbox_project "${_selected_project}"
+    fi
+  done
+
+  show_success_message "Stopping common infrastructure." "1"
+  down_infrastructure "${dotenv_infra_filepath}"
+
+  show_success_message "DevBox was successfully downed and cleaned" "1"
+}
+
+function down_and_clean_devbox_all() {
+  show_success_message "Stopping and cleaning all DevBox projects" "1"
+
+  # Stop all project containers
+  for _selected_project in $(get_project_list "\n"); do
+    if [[ "$(is_project_configured ${_selected_project})" == "1" ]]; then
+      down_and_clean_devbox_project "${_selected_project}"
+    fi
+  done
+
+  show_success_message "Stopping common infrastructure." "1"
+  down_infrastructure "${dotenv_infra_filepath}"
+
+  show_success_message "DevBox was successfully stopped and cleaned" "1"
+}
+
+function docker_destroy() {
+  show_success_message "Purging all DevBox services, containers and volumes" "1"
+  show_warning_message "Pay attention this action is only for emergency purposes when something went wrong and regular stopping does not work"
+  show_warning_message "All files left of places and you will need to cleanup it manually if required."
+  show_warning_message "This operation will kill and destroy all running docker data e.g. containers and volumes"
+
+  destroy_all_docker_services
+
+  show_success_message "Docker data was successfully purged" "1"
+}
+
+function update_docker_images_if_required() {
+  if [[ "${docker_images_autoupdate}" == "0" ]]; then
+    return
+  fi
+
+  _last_updated_since=$(get_devbox_state_docker_images_updated_at_diff)
+  if [[ -z "${_last_updated_since}" || ${_last_updated_since} -gt 2592000 ]]; then # 2592000 = 30 days
+    show_success_message "Looking for docker image updates" "1"
+    refresh_existing_docker_images
+
+    set_devbox_state_docker_images_updated_at "$(date +%s)"
+  fi
+}
+############################ Public functions end ############################

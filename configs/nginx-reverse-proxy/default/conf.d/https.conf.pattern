@@ -1,0 +1,48 @@
+# HTTPS project
+
+server {
+    listen 80;
+    server_name {{WEBSITE_HOST_NAME}} {{website_extra_host_names_nginx_list}};
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443;
+    server_name {{WEBSITE_HOST_NAME}} {{website_extra_host_names_nginx_list}};
+
+    # SSL Section
+    ssl on;
+
+    ssl_certificate /etc/nginx/ssl/{{WEBSITE_SSL_CERT_FILENAME}}.crt;
+    ssl_certificate_key /etc/nginx/ssl/{{WEBSITE_SSL_CERT_FILENAME}}.key;
+
+    access_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-access.log;
+    error_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-error.log;
+
+    ### SSL START SECTION ###
+#    ssl on;
+
+    ssl_session_timeout 5m;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2; #Bad Protocols Should Be Disabled
+    ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
+    ssl_prefer_server_ciphers on;
+    ### SSL END ###
+
+    proxy_buffer_size          128k;
+    proxy_buffers              8 256k;
+    proxy_headers_hash_bucket_size 64;
+
+    client_max_body_size 500M;
+
+    location / {
+      proxy_read_timeout 600;
+      proxy_pass http://{{PROJECT_NAME}}_{{web_container_name}}:80;
+      proxy_redirect off;
+
+      proxy_set_header      Host $host;
+      proxy_set_header      X-Real-IP $remote_addr;
+      proxy_set_header      X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header      X-Forwarded-Proto https;
+      proxy_set_header      X-Forwarded-Port 443;
+    }
+}

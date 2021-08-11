@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+    nginx-reverse-proxy:
+        image: madebyewave/devbox-nginx-reverse-proxy:latest
+        container_name: nginx-reverse-proxy
+        restart: on-failure:5
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ./nginx-reverse-proxy/nginx.conf:/etc/nginx/nginx.conf
+            - ./nginx-reverse-proxy/run/conf.d:/etc/nginx/conf.d
+            - ./nginx-reverse-proxy/run/ssl:/etc/nginx/ssl
+            - ./nginx-reverse-proxy/run/logs:/var/log/nginx
+        networks:
+            - docker_projectsubnetwork
+
+networks:
+    docker_projectsubnetwork:
+        external: true
+
+

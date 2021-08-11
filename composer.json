@@ -1,31 +1,36 @@
 {
-  "name": "ewave/devbox-environment",
-  "description": "Tools to setup and install required containers",
-  "type": "project",
-  "require": {
-    "ewave/devbox-core-scripts": "dev-master",
-    "ewave/devbox-m2-scripts": "dev-master",
-    "ewave/devbox-m1-scripts": "dev-master",
-    "ewave/devbox-akeneo2-scripts": "dev-master"
-  },
-  "license": "OSL-3.0",
-  "minimum-stability": "beta",
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/ewave-com/devbox-tools-core.git"
+    "name": "ewave/devbox-environment",
+    "description": "Tools to setup and install required containers",
+    "type": "project",
+    "version": "3.0.0",
+    "require": {
+        "ewave/devbox-core-scripts": "dev-release/3.0.0",
+        "ewave/devbox-m2-scripts": "dev-release/3.0.0",
+        "ewave/devbox-m1-scripts": "dev-release/3.0.0",
+        "ewave/devbox-akeneo2-scripts": "dev-release/3.0.0",
+        "psr/container": "<1.1.0"
     },
-    {
-      "type": "vcs",
-      "url": "https://github.com/ewave-com/devbox-tools-magento2.git"
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/ewave-com/devbox-tools-magento1.git"
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/ewave-com/devbox-tools-akeneo.git"
+    "license": "OSL-3.0",
+    "minimum-stability": "beta",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ewave-com/devbox-tools-core.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ewave-com/devbox-tools-magento2.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ewave-com/devbox-tools-magento1.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ewave-com/devbox-tools-akeneo.git"
+        }
+    ],
+    "config": {
+        "platform-check": false
     }
-  ]
 }

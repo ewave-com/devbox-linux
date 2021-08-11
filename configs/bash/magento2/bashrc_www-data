@@ -1,0 +1,86 @@
+# Add bin to path
+export PATH="$PATH:/sbin:/usr/sbin:$HOME/bin"
+shopt -s checkwinsize
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
+
+# Custom prompt
+PS1='\[\033[01;32m\]\u@{{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+# Add color
+eval `dircolors -b`
+
+sudo chmod 777 /var/www
+
+# install git autocompletion
+if [ ! -f ~/.git-completion.bash ]; then
+  git_version="$(git --version | sed 's/.*\ //')"
+  curl https://raw.githubusercontent.com/git/git/v${git_version}/contrib/completion/git-completion.bash --max-time 5 -s -o ~/.git-completion.bash > /dev/null
+  test -f ~/.git-completion.bash && sudo chmod ugo+x ~/.git-completion.bash
+fi
+test -f ~/.git-completion.bash && source ~/.git-completion.bash
+
+# change initial directory to app dir by login
+cd {{WEBSITE_APPLICATION_ROOT}}
+
+app_user=$(whoami)
+
+# allow access to common share directory
+if [[ -d "{{WEBSITE_SHARE_DIR}}" && "$(stat -c '%U' {{WEBSITE_SHARE_DIR}})" != "${app_user}" ]];then
+  sudo chown -R ${app_user}:$(id -gn) {{WEBSITE_SHARE_DIR}}
+fi
+
+# copy ssh keys from the shared ssh dir into .ssh and set required permissions
+if [[ -d "{{WEBSITE_SHARE_DIR}}/ssh" ]]; then
+  mkdir -p /var/www/.ssh/ && cp -rf {{WEBSITE_SHARE_DIR}}/ssh/* /var/www/.ssh/
+  sudo chmod 600 /var/www/.ssh/*
+  sudo chmod 777 --silent /var/www/.ssh/*.pub
+fi
+
+# copy composer keys from the shared composer dir into .composer and set required permissions
+if [[ -d "{{WEBSITE_SHARE_DIR}}/composer" ]]; then
+  composer_home="${HOME}/.composer"
+  if [[ ! -d "${composer_home}" ]]; then
+    sudo -su ${app_user} mkdir -p "${composer_home}"
+  fi
+
+  if [[ "$(stat -c '%U' ${composer_home})" != "${app_user}" ]]; then
+    sudo chown -R ${app_user}:$(id -gn) ${composer_home}
+  fi
+
+  sudo chmod 777 --silent ${composer_home}
+  cp -rf {{WEBSITE_SHARE_DIR}}/composer/* "${composer_home}/"
+fi
+
+# downgrade composer from v2 to v1 in case at least one dependency like '"composer-plugin-api": "^1.1"' is found in application composer.lock
+if [[ -f "{{WEBSITE_APPLICATION_ROOT}}/composer.lock" ]]; then
+  if [[ -z "$(composer --version --no-plugins | grep 'Composer version 1.')" && -n $(grep -m 1 -E '\"composer-plugin-api\"\:\ \"[^~]?1\.[0-9.]+\"' "{{WEBSITE_APPLICATION_ROOT}}/composer.lock") ]]; then
+    sudo composer self-update --1 > /dev/null 2>&1
+  fi
+fi
+
+# node modules are synced separately and then symlinked because of directory number of files
+if [[ -n "{{CONFIGS_PROVIDER_NODE_MODULES_DOCKER_SYNC}}" ]]; then
+  mkdir -p /var/www/node_modules_remote
+  if [[ -d "{{WEBSITE_NODE_MODULES_ROOT}}" && ! -d "{{WEBSITE_NODE_MODULES_ROOT}}/node_modules" && ! -s "{{WEBSITE_NODE_MODULES_ROOT}}/node_modules" ]]; then
+    ln -nsf /var/www/node_modules_remote "{{WEBSITE_NODE_MODULES_ROOT}}/node_modules"
+  fi
+fi
+
+# add alias for devbox platform-tools utilities
+alias platform-tools="php {{TOOLS_PROVIDER_REMOTE_PATH}}/{{TOOLS_PROVIDER_ENTRYPOINT}}"
+
+# Common application aliases
+alias ll="ls -la"
+alias coperm="platform-tools core:setup:permissions"
+
+#Magento2 aliases
+alias m2_cf="php {{WEBSITE_APPLICATION_ROOT}}/bin/magento cache:flush"
+alias m2_cc="php {{WEBSITE_APPLICATION_ROOT}}/bin/magento cache:clean"
+
+alias cafl="php {{WEBSITE_APPLICATION_ROOT}}/bin/magento cache:flush"
+alias cacl="php {{WEBSITE_APPLICATION_ROOT}}/bin/magento cache:clean"
+alias supgrade="php {{WEBSITE_APPLICATION_ROOT}}/bin/magento setup:upgrade"
+alias cafull="rm -rf {{WEBSITE_APPLICATION_ROOT}}/pub/static {{WEBSITE_APPLICATION_ROOT}}/var/cache generated/ && php {{WEBSITE_APPLICATION_ROOT}}/bin/magento cache:flush && php {{WEBSITE_APPLICATION_ROOT}}/bin/magento setup:upgrade --keep-generated && php {{WEBSITE_APPLICATION_ROOT}}/bin/magento setup:di:compile && php {{WEBSITE_APPLICATION_ROOT}}/bin/magento setup:static-content:deploy -f"

@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+    exim4:
+        build: ./exim4/
+        image: ewave/exim4
+        restart: on-failure:5
+        container_name: mailer
+        volumes:
+            - ./exim4/config/exim4/:/etc/exim4
+        networks:
+            - docker_projectsubnetwork
+
+networks:
+    docker_projectsubnetwork:
+        external: true

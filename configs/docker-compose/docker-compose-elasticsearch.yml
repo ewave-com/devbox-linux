@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+    es:
+        image: {{CONTAINER_ELASTICSEARCH_IMAGE}}:{{CONTAINER_ELASTICSEARCH_VERSION}}
+        container_name: {{PROJECT_NAME}}_{{CONTAINER_ELASTICSEARCH_NAME}}
+        restart: unless-stopped
+        ports:
+            - "{{CONTAINER_ELASTICSEARCH_PORT}}:9200"
+        environment:
+            - cluster.name=webserver_default
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+            - "http.host=0.0.0.0"
+            - "transport.host=127.0.0.1"
+            - "xpack.security.enabled=false"
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        volumes:
+            - {{PROJECT_NAME}}_{{CONTAINER_ELASTICSEARCH_NAME}}_data_sync:/usr/share/elasticsearch/data
+        networks:
+            - docker_projectsubnetwork
+
+volumes:
+      {{PROJECT_NAME}}_{{CONTAINER_ELASTICSEARCH_NAME}}_data_sync:
+          external: true
+
+networks:
+    docker_projectsubnetwork:
+        external: true
