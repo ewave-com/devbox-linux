@@ -93,7 +93,7 @@ function replace_file_line_endings() {
     exit 1
   fi
 
-  tr '\r\n' '\n' <"${_filepath}" >"${_filepath}.tmp"
+  tr -d $'\r' < "${_filepath}" >"${_filepath}.tmp"
   mv "${_filepath}.tmp" "${_filepath}"
 }
 

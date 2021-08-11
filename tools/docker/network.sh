@@ -16,7 +16,7 @@ function remove_docker_network() {
   local _network_presented
   _network_presented=$(docker network ls --filter NAME="${devbox_network_name}" --format="{{.Name}}")
   if [[ -n "${_network_presented}" ]]; then
-    docker network rm "${devbox_network_name}" >/dev/null #2>&1
+    docker network rm "${devbox_network_name}" >/dev/null 2>&1
   fi
 }
 

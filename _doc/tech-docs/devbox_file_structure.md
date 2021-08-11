@@ -1,8 +1,8 @@
-# DevBox File Structure
+# DevBox file structure
 
 ```bash
 {devbox_root}
-    ├── _doc                                           # current dir
+    ├── _doc                                           # current dir with documentation
     ├── configs                                        # devbox configuration file
     │   ├── bash                                       # available config providers for bash configs
     │   │   ├── akeneo                                      
@@ -71,7 +71,6 @@
     │   │   ├── default
     │   │   └── magento2
     │   └── project-defaults.env                       # base .env file with all default values
-    ├── down-devbox.sh                                 # script entrypoint to stop or shutdown project 
     ├── projects                                       # directory for all projects sources
     │   ├── my_project_1                               # your project named my_project_1
     │   │   ├── docker-up                              # directory for generated configs and runtime data of project 
@@ -86,7 +85,8 @@
     │   └── info.txt
     ├── start-devbox.sh                                # script entrypoint to start project
     ├── sync-actions.sh                                # script entrypoint to restart project sync and open sync logs
-    ├── tools                                          # devbox code
+    ├── down-devbox.sh                                 # script entrypoint to stop or shutdown project
+    ├── tools                                          # devbox code, see devbox_code_structure.md
     │   └── ...
     └── vendor
         ├── ...

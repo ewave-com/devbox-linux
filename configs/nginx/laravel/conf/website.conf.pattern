@@ -7,6 +7,8 @@ server {
     server_name {{WEBSITE_HOST_NAME}} {{website_extra_host_names_nginx_list}};
     root        {{WEBSITE_APPLICATION_ROOT}}/public;
 
+    client_max_body_size 500M;
+
     index       index.php index.html index.htm;
     access_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-access.log;
     error_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-error.log;

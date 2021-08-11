@@ -10,6 +10,8 @@ server {
     access_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-access.log;
     error_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-error.log;
 
+    client_max_body_size 500M;
+
     location / {
         try_files $uri $uri/ /index.php?$args;
 

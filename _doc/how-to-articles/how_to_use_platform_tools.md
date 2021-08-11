@@ -54,8 +54,6 @@ shows the output
 
 # Command descriptions
 
->!!!! TODO !!!!
-
 ## Core commands (common for all entrypoints)
 
 ### Command `core:remote-files:download`
@@ -160,7 +158,7 @@ It means in the table 'core_config_data' updating of config paths:
 
 This command downloads predefined Magento 2 configs from your remote storage and puts them to the configured directory 
 like it is done by command 'core:remote-files:download'.
-Also additionally it updates main database hosts in the config.php accdoring to your environment configuration, 
+Also additionally it updates main database hosts in the config.php according to your environment configuration, 
 creates a new config.php if it was missing and sets required permissions.
 
 ### Command `magento2:setup:db-sales-prefixes`
@@ -177,7 +175,7 @@ See the related configuration subsection `sources->domains_mapping` in [How to c
 
 ### Command `magento2:setup:finalize`
 
-This command performs last actions for local development.
+This command performs final actions for local development.
 It optionally calls (will ask for your confirmation):
 - set magento mode to 'developer' using `bin/magento deploy:mode:set developer`
 - enables all modules in case 'config.php' is missing using command `bin/magento module:enable --all`
@@ -248,7 +246,7 @@ and sets required permissions.
 
 ### Command `akeneo:setup:finalize`
 
-This command performs last actions for local development.
+This command performs final actions for local development.
 It optionally calls (will ask for your confirmation):
 - clears application cache using command `bin/console cache:clear`
 - generates static assets using command `php bin/console pim:installer:assets -e prod --clean`
@@ -288,7 +286,7 @@ core:setup:permissions,
 
 ### Command `akeneo2:setup:elastic`
 
-Using this command it is possible to import indices data from ES dump files using npm elasticdump package. (todo move install from dump to global level)
+Using this command it is possible to import indices data from ES dump files using npm elasticdump package.
 See the related configuration subsection `sources->es` in [How to configure .env-project.json](project_env_project_json.md)
 
 Otherwise this command resets ElasticSearch indices data and performs fresh reindex of your mysql data for Akeneo 2 version.
@@ -320,7 +318,7 @@ core:setup:permissions,
 
 ### Command `akeneo3:setup:elastic`
 
-Using this command it is possible to import indices data from ES dump files using npm elasticdump package. (todo move install from dump to global level)
+Using this command it is possible to import indices data from ES dump files using npm elasticdump package.
 See the related configuration subsection `sources->es` in [How to configure .env-project.json](project_env_project_json.md)
 
 Otherwise this command resets ElasticSearch indices data and performs fresh reindex of your mysql data for Akeneo 3 version.

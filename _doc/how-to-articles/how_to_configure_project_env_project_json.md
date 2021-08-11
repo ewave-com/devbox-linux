@@ -117,6 +117,25 @@ or
         },
 ```
 
+Also you can specify the secondary repository in case your project need it. To do this just create one more section
+similar to `sources->code` called `sources->code_secondary` and pur secondary repo credentials there.
+For example:
+```json
+        "code": {
+            "source_type": "vcs",
+            "source_path": "git@github.com:my_project/my_repo.git",
+            "source_branch": "master"
+        },
+        "code_secondary": {
+            "source_type": "vcs",
+            "source_path": "git@github.com:my_project/my_secondary_repo.git",
+            "source_branch": "develop",
+            "destination_website_path": "[~website_root]/dist"
+        },
+```
+
+Then you can execute the regular platofrm-tools command `core:setup:code` and code will be cloned from both repos. 
+
 ### Subsection `sources->db`
 Subsection `sources->db` defines params of database dump storage. You can specify a source of sql dump in raw or gzipped format to be downloaded.
 The section required for platform tools command `core:setup:db`. (see related [DevBox Platform Tools](platform_tools.md))

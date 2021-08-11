@@ -217,7 +217,7 @@ function get_process_info_by_allocated_port() {
 
   if [[ -n ${_pid} && -n "${_pname}" ]]; then
     if [[ -n $(echo "${_pname}" | grep -i "docker") ]]; then
-      _container_name=$(docker ps -a --filter='publish=${_checked_port}' --filter=status=running --format='{{.Names}}')
+      _container_name=$(docker ps -a --filter="publish=${_checked_port}" --filter=status=running --format='{{.Names}}')
       echo "PID: ${_pid}; Process name: '${_pname}'; Docker container name: '${_container_name}'"
       return
     fi

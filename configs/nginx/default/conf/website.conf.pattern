@@ -9,8 +9,10 @@ server {
 
     index       index.php index.html index.htm;
 
+    client_max_body_size 500M;
+
     access_log  /var/log/nginx/{{WEBSITE_HOST_NAME}}-access.log;
-    error_log   /var/log/nginx{{WEBSITE_HOST_NAME}}-error.log;
+    error_log   /var/log/nginx/{{WEBSITE_HOST_NAME}}-error.log;
 
     location / {
 

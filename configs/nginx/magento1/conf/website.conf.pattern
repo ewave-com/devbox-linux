@@ -13,6 +13,8 @@ server {
     root $MAGE_ROOT;
     index index.html index.php;
 
+    client_max_body_size 500M;
+
     location / {
         autoindex            off;
         try_files $uri $uri/ @handler;

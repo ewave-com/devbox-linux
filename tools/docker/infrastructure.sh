@@ -73,7 +73,30 @@ function stop_infrastructure() {
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/"*
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/ssl/"*
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
-    docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}"
+    if [[ "${os_type}" == "macos" ]]; then
+      # some containers might hang with Docker for Mac due to stopsignal inconsistencies inside docker, so use added compose timeout
+      # Error: UnixHTTPConnectionPool(host='localhost', port=None): Read timed out.
+      # As a workaround the only 2 solutions will work: restart docker every time, or downgrade to 2.* version and wait for fix...
+      # Related sources:
+      #   https://github.com/docker/compose/issues/3927 - issue opened in 2016!
+      #   https://docs.docker.com/engine/reference/commandline/stop/
+      #   https://stackoverflow.com/questions/50898134/what-does-docker-stopsignal-do
+      #   https://github.com/nginxinc/docker-nginx/commit/16ec71e7e8452fa28a95d014807f95605c09a8fe
+      # TODO after MacOs bug will be fixed (but we can't hope):
+      # TODO - remove these lines and make as for linux
+      set +e
+      docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}"
+      if [[ "$?" != "0" ]]; then
+        show_warning_message "Tip: if you see the error 'UnixHTTPConnectionPool' Unfortunately we can't do anything around this docker problem."
+        show_warning_message "The only working solution now is downgrading of Docker to the latest 2.5.* version with complete docker configs removal."
+        show_warning_message "Download link: https://docs.docker.com/docker-for-mac/previous-versions/"
+        exit 1
+      fi
+#      (docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}") > /dev/null 2>&1
+      set -e
+    elif [[ "${os_type}" == "linux" ]]; then
+      docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}"
+    fi
   fi
 
   if [[ "$(is_docker_container_running 'portainer')" == "1" ]]; then
@@ -114,7 +137,21 @@ function down_infrastructure() {
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/"*
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/ssl/"*
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
-    docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}"
+    if [[ "${os_type}" == "macos" ]]; then
+      # see comment here in the stop_infrastructure function
+      set +e
+      docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}"
+      if [[ "$?" != "0" ]]; then
+        show_warning_message "Tip: if you see the error 'UnixHTTPConnectionPool' Unfortunately we can't do anything around this docker problem."
+        show_warning_message "The only working solution now is downgrading of Docker to the latest 2.5.* version with complete docker configs removal."
+        show_warning_message "Download link: https://docs.docker.com/docker-for-mac/previous-versions/"
+        exit 1
+      fi
+#      (docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}") > /dev/null 2>&1
+      set -e
+    elif [[ "${os_type}" == "linux" ]]; then
+      docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}"
+    fi
   fi
   [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]] && kill_container_by_name "nginx-reverse-proxy" "SIGTERM" &
   [[ "$(is_docker_container_exist 'nginx-reverse-proxy')" == "1" ]] && set +e && rm_container_by_name "nginx-reverse-proxy" && set -e

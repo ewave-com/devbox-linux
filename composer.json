@@ -7,7 +7,8 @@
         "ewave/devbox-core-scripts": "dev-release/3.0.0",
         "ewave/devbox-m2-scripts": "dev-release/3.0.0",
         "ewave/devbox-m1-scripts": "dev-release/3.0.0",
-        "ewave/devbox-akeneo2-scripts": "dev-release/3.0.0"
+        "ewave/devbox-akeneo2-scripts": "dev-release/3.0.0",
+        "psr/container": "<1.1.0"
     },
     "license": "OSL-3.0",
     "minimum-stability": "beta",
@@ -28,5 +29,8 @@
             "type": "vcs",
             "url": "https://github.com/ewave-com/devbox-tools-akeneo.git"
         }
-    ]
+    ],
+    "config": {
+        "platform-check": false
+    }
 }

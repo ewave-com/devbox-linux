@@ -1,9 +1,8 @@
 # Linux DevBox
 http://devbox.ewave.com/
 
-TODO complete changelog with all changes
-
 ## Release 3.0.0
+
 ### Main changes:
 - DevBox structure aligned with Windows and MacOs implementations
 - Global refactoring to improve stability and usability:
@@ -23,6 +22,7 @@ TODO complete changelog with all changes
       you can find unison logs of all current sync processes at path {project_dir}/docker-up/docker-sync/*.log
     - Excluded files synchronization in case only permissions were changed
     - Added new root script 'sync-action' which allows restarting syncs and open logs of exact sync process.
+    - Now data from MySql and Elasticsearch containers also are syncing to the host machine, supports native docker synchronization and also docker-sync with unison strategy  
 - Files syncing [Linux]:
   - Uses native docker sync as most suitable and fast solution. 
   - Significantly reduced number of permissions problems caused by conflicts of host and docker users. Used linux 'facl' package to keep open permissions for new files of main project directories.
@@ -37,6 +37,11 @@ TODO complete changelog with all changes
   this lets avoid cases when some used in config env variable was missed
   - Added base support of several domains of website
   - Added configurable docker image name and image versions for all project docker service configurations
+  - Introduced 'project.state' file to store project status info and improve starting time
+  - Added monthly automatical 'composer update' to pull last updated
+  - Added monthly autopull of docker images with 'latest' tag (it mean exact version is not specified)
+  - Added possibility to disable node_modules sync and new composer cache sync using empty parameters value
+  - Evaluating of dynamic free port for Mysql, Elasticsearch and SSH connection now searches for possible port including docker containers including stopped to keep already allocated port is possible
 
 Web container main changes:
 - Default folder is changed to application dir on www-data login
@@ -47,10 +52,13 @@ Web container main changes:
 - Bash history is now shared to host container and is not cleaned on project shutdown
 - Added git autocompletion inside container
 - Added platform depended aliases, see examples in .bashrc files.
-- Added composer downgrade in case project composer.lock is still not updated to use composer 2.0+ 
+- Added supporting of php auto_prepend_file to perfom some actions without touching project repo code.
+  This might be usefull for example to resolve Magento website codes, to pull media files of fly, or for whatever you need.
+- Added composer downgrade in case project composer.lock is still not updated to use composer 2.0+
 - Added xdebug 3.0 config. Debugger is ready to work with both <3.0 and 3.0+ versions.
 - Folder node_modules location is configurable using .env param WEBSITE_NODE_MODULES_ROOT
 - xdebug port is configurable using .env param WEBSITE_PHP_XDEBUG_PORT
+
 
 Deprecation section:
 - .env, WEBSITE_DOCUMENT_ROOT is obsolete, use WEBSITE_SOURCES_ROOT and WEBSITE_APPLICATION_ROOT instead (backward compatibility fix is included)

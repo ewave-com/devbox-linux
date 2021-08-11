@@ -225,8 +225,12 @@ module DockerSync
           break if exit_status == 0
 
           attempt += 1
+          # Ewave change, show more error details
+          say_status 'error', "Command failed. Attempt # #{attempt}. Cmd: " + cmd, :red
+          say_status 'error', "Error message: " + stderr, :red
+          # Ewave change end
           if attempt > max_attempt
-            raise "Failed to start unison container in time, try to increase max_attempt (currently #{max_attempt}) in your configuration. See https://github.com/EugenMayer/docker-sync/wiki/2.-Configuration for more informations"
+            raise "Failed to start unison container in time, try to increase max_attempt (currently #{max_attempt}) in your configuration. See https://github.com/EugenMayer/docker-sync/wiki/2.-Configuration for more informations."
           end
 
           sleep 1
