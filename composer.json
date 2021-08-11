@@ -4,10 +4,10 @@
     "type": "project",
     "version": "3.0.0",
     "require": {
-        "ewave/devbox-core-scripts": "dev-release/3.0.0",
-        "ewave/devbox-m2-scripts": "dev-release/3.0.0",
-        "ewave/devbox-m1-scripts": "dev-release/3.0.0",
-        "ewave/devbox-akeneo2-scripts": "dev-release/3.0.0",
+        "ewave/devbox-core-scripts": "dev-master",
+        "ewave/devbox-m2-scripts": "dev-master",
+        "ewave/devbox-m1-scripts": "dev-master",
+        "ewave/devbox-akeneo-scripts": "dev-master",
         "psr/container": "<1.1.0"
     },
     "license": "OSL-3.0",
