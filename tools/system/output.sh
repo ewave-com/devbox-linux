@@ -25,7 +25,7 @@ function show_success_message() {
   local _hierarchy_lvl=${2-"0"}
 
   _prefix="$(get_hierarchy_lvl_prefix ${_hierarchy_lvl})"
-  echo -e "${GREEN}$(date) ${_prefix}${_message}${SET}"
+  echo -e "$(date '+%d %b %X') ${GREEN}${_prefix}${_message}${SET}"
 }
 
 function show_message() {
