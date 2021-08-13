@@ -75,6 +75,9 @@ alias platform-tools="php {{TOOLS_PROVIDER_REMOTE_PATH}}/{{TOOLS_PROVIDER_ENTRYP
 # Common application aliases
 alias ll="ls -la"
 alias coperm="platform-tools core:setup:permissions"
+alias composer4G="php -d memory_limit=4G $(which composer)"
+alias composer6G="php -d memory_limit=6G $(which composer)"
+alias composer8G="php -d memory_limit=8G $(which composer)"
 
 #Magento2 aliases
 alias m2_cf="php {{WEBSITE_APPLICATION_ROOT}}/bin/magento cache:flush"
