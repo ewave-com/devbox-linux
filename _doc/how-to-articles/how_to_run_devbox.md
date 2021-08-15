@@ -176,10 +176,11 @@ But still a couple of words for clarification.
 
 Shutdown menu:
 
-![Preview](../img/devbox_commands/sync_actions_manu.png)
+![Preview](../img/devbox_commands/sync_actions_menu.png)
 
 Actions:
 - `[0] [Exit]` - terminate selection and exit
+- 
 - `[1] Start sync` - starts previously terminated docker-sync synchronization including sync health-checkers
 
 - `[2] Stop sync` - stops docker-sync synchronization including sync health-checkers (for example before starting or for debug purposes)
@@ -187,7 +188,4 @@ Actions:
 - `[3] Restart sync` - fast restart synchronization, it means do its stopping and starting again.
   Also this is default operation by passing project name as the command argument.
 
-- `[4] Purge data and restart re-sync` - similar to the previous command with during stopping it also empties the copied data from the docker volumes.
-It means the starting at first performs the full initial synchronization. 
-
-- `[5] Show logs` - open synchronization log file to show last logs. File will be scrolled in runtime to show only actual records. 
+- `[4] Show logs` - open synchronization log file to show last logs. File will be scrolled in runtime to show only actual records. 

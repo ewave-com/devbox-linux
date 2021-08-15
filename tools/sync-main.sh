@@ -51,21 +51,6 @@ function restart_sync() {
   docker_sync_start_all_directory_volumes "${project_up_dir}"
 }
 
-function purge_and_restart_sync() {
-  local _selected_project=${1-''}
-  init_selected_project "${_selected_project}"
-
-  if [[ "$(is_project_started ${_selected_project})" == "0" ]]; then
-    show_warning_message "Project '${_selected_project}' is not started for this operation."
-    exit 1
-  fi
-
-  docker_sync_stop_all_directory_volumes "${project_up_dir}"
-  docker_sync_clean_all_directory_volumes "${project_up_dir}"
-
-  docker_sync_start_all_directory_volumes "${project_up_dir}"
-}
-
 function open_log_window() {
   local _selected_project=${1-''}
   local _selected_sync_names=${2-''}

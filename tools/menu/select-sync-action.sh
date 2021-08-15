@@ -11,7 +11,7 @@ function select_sync_action_menu() {
 
   draw_menu_header "Sync action"
 
-  local _options_str="[Exit],Start sync,Stop sync,Restart sync,Purge data and restart re-sync,Show logs"
+  local _options_str="[Exit],Restart sync,Stop sync,Start sync,Show logs"
 
   local _selected_type
   select_menu_item "${_options_str[@]}" "_selected_type"
@@ -21,14 +21,12 @@ function select_sync_action_menu() {
     exit 0
   fi
 
-  if [[ "${_selected_type}" == "Start sync" ]]; then
-    _selected_type='start_sync'
+  if [[ "${_selected_type}" == "Restart sync" ]]; then
+      _selected_type='restart_sync'
   elif [[ "${_selected_type}" == "Stop sync" ]]; then
     _selected_type='stop_sync'
-  elif [[ "${_selected_type}" == "Restart sync" ]]; then
-    _selected_type='restart_sync'
-  elif [[ "${_selected_type}" == "Purge data and restart re-sync" ]]; then
-    _selected_type='purge_and_restart_sync'
+  elif [[ "${_selected_type}" == "Start sync" ]]; then
+    _selected_type='start_sync'
   elif [[ "${_selected_type}" == "Show logs" ]]; then
     _selected_type='show_logs'
   fi
