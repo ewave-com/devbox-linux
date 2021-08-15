@@ -59,9 +59,6 @@ Stop synchronization into containers entrypoint function.
 ```restart_sync([string]$_selected_project): void```
 Restart synchronization into containers entrypoint function.
 
-```purge_and_restart_sync([string]$_selected_project): void```
-Purge stored container files and restart synchronization into containers entrypoint function.
-
 ```open_log_window([string]$_selected_project, [string list | 'all']$_selected_sync_names): void```
 Open synchronization log window entrypoint function.
 $_selected_sync_names
@@ -538,7 +535,6 @@ List is static, items:
 Start sync
 Stop sync
 Restart sync
-Purge data and restart re-sync
 Show logs
 
 ### Function list

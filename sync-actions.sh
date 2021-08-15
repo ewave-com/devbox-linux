@@ -52,12 +52,6 @@ case $_selected_sync_action in
   fi
   restart_sync "${_selected_project}"
   ;;
-"purge_and_restart_sync")
-  if [[ -z "${_selected_project}" ]]; then
-    select_project_menu "_selected_project"
-  fi
-  purge_and_restart_sync "${_selected_project}"
-  ;;
 "show_logs")
   if [[ -z "${_selected_project}" ]]; then
     select_project_menu "_selected_project"
