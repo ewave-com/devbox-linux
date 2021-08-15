@@ -71,7 +71,6 @@ function stop_infrastructure() {
 
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/conf.d/"*
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/"*
-  rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/ssl/"*
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
     if [[ "${os_type}" == "macos" ]]; then
       # some containers might hang with Docker for Mac due to stopsignal inconsistencies inside docker, so use added compose timeout
@@ -135,7 +134,6 @@ function down_infrastructure() {
   # down nginx-reverse-proxy
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/conf.d/"*
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/"*
-  rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/ssl/"*
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
     if [[ "${os_type}" == "macos" ]]; then
       # see comment here in the stop_infrastructure function
