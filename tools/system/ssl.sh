@@ -17,21 +17,23 @@ function ssl_disable_system_certificate() {
 }
 
 function ssl_generate_root_certificate_authority() {
-    local _target_root_crt_path=${1-''}
-    local _target_root_key_path=${2-''}
+  local _target_root_crt_path=${1-''}
+  local _target_root_key_path=${2-''}
 
-    if [[ -z "${_target_root_crt_path}" ]]; then
-      show_error_message "Unable to generate Root CA certificate. Target path of certificate cannot be empty."
-      exit 1
-    fi
+  if [[ -z "${_target_root_crt_path}" ]]; then
+    show_error_message "Unable to generate Root CA certificate. Target path of certificate cannot be empty."
+    exit 1
+  fi
 
-    local _cert_basename
-    _cert_basename=$(basename ${_target_root_crt_path} '.crt')
+  local _cert_basename
+  _cert_basename=$(basename ${_target_root_crt_path} '.crt')
 
-    if [[ -z "${_target_root_key_path}" ]]; then
-      _target_root_key_path="$(dirname ${_target_root_crt_path})/${_cert_basename}.key"
-    fi
-    _target_root_pem_path="$(dirname ${_target_root_crt_path})/${_cert_basename}.pem"
+  if [[ -z "${_target_root_key_path}" ]]; then
+    _target_root_key_path="$(dirname ${_target_root_crt_path})/${_cert_basename}.key"
+  fi
+  _target_root_pem_path="$(dirname ${_target_root_crt_path})/${_cert_basename}.pem"
+
+  mkdir -p "$(dirname ${_target_root_crt_path})"
 
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
     local _openssl_command

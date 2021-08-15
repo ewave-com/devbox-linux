@@ -80,6 +80,10 @@ function prepare_website_ssl_certificate() {
     if [[ ! -f "${_ssl_dir}/DevboxRootCA.crt" || ! -f "${_ssl_dir}/DevboxRootCA.pem" || ! -f "${_ssl_dir}/DevboxRootCA.key" ]]; then
       ssl_generate_root_certificate_authority "${_ssl_dir}/DevboxRootCA.crt"
       ssl_import_new_system_certificate "${_ssl_dir}/DevboxRootCA.crt"
+
+      show_success_message "Devbox Root CA has been generated and imported to your system."
+      show_warning_message "If you still see the warning about insecure connection in your browser please import the certificate authority to your browser. "
+      show_warning_message "Root CA Path: ${_ssl_dir}/DevboxRootCA.crt"
     fi
 
     ssl_generate_domain_certificate "${WEBSITE_HOST_NAME}" "${_extra_domains}" "${project_up_dir}/configs/ssl/${WEBSITE_SSL_CERT_FILENAME}.crt" "${project_up_dir}/configs/ssl/${WEBSITE_SSL_CERT_FILENAME}.key" "${_ssl_dir}/DevboxRootCA.pem" "${_ssl_dir}/DevboxRootCA.key"
