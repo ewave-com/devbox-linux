@@ -612,7 +612,7 @@ The script which prepares all project specific configuration files based on .env
 ``` prepare_project_docker_up_configs(): void```
 Main preparation function. It calls all required certain preparation functions.
 
-``` cleanup_project_docker_up_configs([string]$--------------------): void```
+``` cleanup_project_docker_up_configs(): void```
 Remove from the proejct 'docker-up' directory all files 'docker-compose-\*.yml' and "docker-sync-\*.yml".
 Also remove directories 'docker-up/configs/', 'docker-up/docker-sync/', 'docker-up/nginx-reverse-proxy/'
 This cleanup called when you do full down of your project.
@@ -678,8 +678,8 @@ Prepare project specific configuration for the infrastructure nginx-reverse-prox
 Generate project specific nginx config file for nginx-reverse-proxy.
 If required generate and install SSL certificate.
 
-``` cleanup_project_nginx_reverse_proxy_configs(): void```
-Remove project specific nginx config file and certificate for nginx-reverse-proxy.
+``` cleanup_project_nginx_reverse_proxy_configs([bool]$_full_clean = false): void```
+Remove project specific nginx config file and certificate for nginx-reverse-proxy. Keep certificates by default ($_full_clean).
 
 #### Local functions: -
 
@@ -1170,8 +1170,11 @@ Import the new certificate file.
 ``` ssl_disable_system_certificate([string]$_cert_source_path): void```
 Deactivate the certificate file.
 
-``` ssl_generate_domain_certificate([string]$_website_namem, [string]$_target_crt_path, [string]$_target_key_path = ""): void```
-Generate certificate files for the domain using openssl system package.
+``` ssl_generate_root_certificate_authority([string]$_target_root_crt_path, [string]$_target_root_key_path): void```
+Generate DevBox Root CA to sign generated project certificates 
+
+``` ssl_generate_domain_certificate([string]$_website_namem, [string]$_extra_domains = "", [string]$_target_crt_path, [string]$_target_key_path = "", [string]$_root_ca_pem_path, [string]$_root_ca_key_path = ""): void```
+Generate certificate files for the domain using openssl system package. Certificate will be signed by the given root_ca, so it is required as well.
 
 #### Local functions:
 

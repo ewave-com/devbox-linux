@@ -90,7 +90,7 @@ function stop_current_project() {
   docker_sync_stop_all_directory_volumes "${project_up_dir}"
 
   show_success_message "Cleaning nginx-reverse-proxy configs" "2"
-  cleanup_project_nginx_reverse_proxy_configs
+  cleanup_project_nginx_reverse_proxy_configs "0"
 
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
     show_success_message "Restarting nginx-reverse-proxy" "2"
@@ -121,7 +121,7 @@ function down_current_project() {
   fi
 
   show_success_message "Cleaning nginx-reverse-proxy configs" "2"
-  cleanup_project_nginx_reverse_proxy_configs
+  cleanup_project_nginx_reverse_proxy_configs "1"
 
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
     show_success_message "Restarting nginx-reverse-proxy" "2"
@@ -164,7 +164,7 @@ function down_and_clean_current_project() {
   fi
 
   show_success_message "Cleaning nginx-reverse-proxy configs" "2"
-  cleanup_project_nginx_reverse_proxy_configs
+  cleanup_project_nginx_reverse_proxy_configs "1"
 
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
     show_success_message "Restarting nginx-reverse-proxy" "2"
