@@ -7,7 +7,7 @@
         "ewave/devbox-core-scripts": "dev-master",
         "ewave/devbox-m2-scripts": "dev-master",
         "ewave/devbox-m1-scripts": "dev-master",
-        "ewave/devbox-akeneo-scripts": "dev-master",
+        "ewave/devbox-akeneo2-scripts": "dev-master",
         "psr/container": "<1.1.0"
     },
     "license": "OSL-3.0",
