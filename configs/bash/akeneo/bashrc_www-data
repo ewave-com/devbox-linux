@@ -78,6 +78,13 @@ alias coperm="platform-tools core:setup:permissions"
 alias composer4G="php -d memory_limit=4G $(which composer)"
 alias composer6G="php -d memory_limit=6G $(which composer)"
 alias composer8G="php -d memory_limit=8G $(which composer)"
+if [ ! -z $(php -v | grep "Xdebug v2") ]; then
+  # xDebug 2.0 alias
+  alias xphp="PHP_IDE_CONFIG='serverName={{WEBSITE_HOST_NAME}}' php -dxdebug.remote_autostart=1 "
+else
+  # xDebug 3.0 alias
+  alias xphp="PHP_IDE_CONFIG='serverName={{WEBSITE_HOST_NAME}}' php -dxdebug.start_with_request=1 "
+fi
 
 #Akeneo aliases
 alias cafl="rm -rf {{WEBSITE_APPLICATION_ROOT}}/var/cache/ && php {{WEBSITE_APPLICATION_ROOT}}/bin/console ca:cl -e prod"
