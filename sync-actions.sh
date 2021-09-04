@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -eu
+set -eu       # Normal working mode
+#set -eux     # Verbose debug mode
 
 # 'realpath' might be not installed
 if [[ ! -z "$(which realpath)" ]]; then

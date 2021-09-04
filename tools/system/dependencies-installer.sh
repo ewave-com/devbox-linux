@@ -190,6 +190,10 @@ function install_extra_packages() {
     sudo apt-get install -y install openssl >/dev/null
   fi
 
+  if [[ -z "$(which jq)" ]]; then
+    sudo apt-get install -y install jq >/dev/null
+  fi
+
   if [[ -z "$(which setfacl)" ]]; then
     sudo apt-get install -y install acl >/dev/null
   fi

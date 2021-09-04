@@ -11,8 +11,9 @@ Main script to handle main project operations
 
 #### Public functions:
 
-```start_devbox_project ([string]$_selected_project): void``` 
-Start project entrypoint function. 
+```start_devbox_project ([string]$_selected_project, [bool]$_no_interaction = $false): void```
+Start project entrypoint function.
+If $_no_interaction is true omit interactive platform_tools menu
 
 ```stop_devbox_project([string]$_selected_project): void```
 Stop project entrypoint function.
@@ -1020,8 +1021,9 @@ Evaluate next free port for MySQL container based on system ports info and exist
 ``` get_mysql_port_from_existing_container([string]$_container_name): string```
 Retrieve assigned MySQL port from metadata of already existing container.
 
-``` ensure_mysql_port_is_available([string]$_checked_port): void```
+``` ensure_mysql_port_is_available([string]$_checked_port, [string]$_container_name = ''): void```
 Ensure static MySQL port is available to be allocated before usage. Otherwise, throw an error.
+If container name presented and busy port belongs to the given $_container_name - omit error and continue.
 
 ``` get_available_elasticsearch_port(): string```
 Evaluate next free port for Elasticsearch container based on system ports info and existing container port info starting from default port 9200.
@@ -1029,8 +1031,9 @@ Evaluate next free port for Elasticsearch container based on system ports info a
 ``` get_elasticsearch_port_from_existing_container([string]$_container_name): string```
 Retrieve assigned Elasticsearch port from metadata of already existing container.
 
-``` ensure_elasticsearch_port_is_available([string]$_checked_port): void```
+``` ensure_elasticsearch_port_is_available([string]$_checked_port, [string]$_container_name = ''): void```
 Ensure static Elasticsearch port is available to be allocated before usage. Otherwise, throw an error.
+If container name presented and busy port belongs to the given $_container_name - omit error and continue.
 
 ``` get_available_website_ssh_port(): string```
 Evaluate next free port for ssh connection of web container based on system ports info and existing container port info starting from default port 2300.
@@ -1038,8 +1041,9 @@ Evaluate next free port for ssh connection of web container based on system port
 ``` get_website_ssh_port_from_existing_container([string]$_container_name): string```
 Retrieve assigned for ssh connection of web container from metadata of already existing container.
 
-``` ensure_website_ssh_port_is_available([string]$_checked_port): void```
+``` ensure_website_ssh_port_is_available([string]$_checked_port, [string]$_container_name = ''): void```
 Ensure static ssh connection of web container is available to be allocated before usage. Otherwise, throw an error.
+If container name presented and busy port belongs to the given $_container_name - omit error and continue.
 
 ``` ensure_port_is_available([string]$_checked_port): void```
 Common function to ensure the given port is available to be allocated before usage. Otherwise, throw an error.
