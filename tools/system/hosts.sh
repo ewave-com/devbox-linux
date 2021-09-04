@@ -17,7 +17,7 @@ function add_website_domain_to_hosts() {
     # Add site to file hosts, if doesn't exist
     local _hosts_record
     _hosts_record="${_ip_address} ${_domain}"
-    if [[ -z $(cat /etc/hosts | grep "${_hosts_record}" | head -n 1) ]]; then
+    if [[ -z $(cat /etc/hosts | grep "^${_hosts_record}$" | head -n 1) ]]; then
       sudo -- sh -c -e "echo '${_hosts_record}' >> /etc/hosts"
     fi
   done
@@ -33,11 +33,15 @@ function delete_website_domain_from_hosts() {
   fi
 
   for _domain in $(echo "${_domains}" | tr ', ' ' '); do
-    if [[ "${os_type}" == "macos" ]]; then
-      # MacOs specific, "sed -i" requires empty file suffix to update file in place, so set "sed -i ''"
-      sudo -- sh -c -e "sed -i '' '/${_ip_address} ${_domain}/d' /etc/hosts" >/dev/null #2>&1
-    elif [[ "${os_type}" == "linux" ]]; then
-      sudo -- sh -c -e "sed -i '/${_ip_address} ${_domain}/d' /etc/hosts" >/dev/null #2>&1
+    local _hosts_record
+    _hosts_record="${_ip_address} ${_domain}"
+    if [[ ! -z $(cat /etc/hosts | grep "^${_hosts_record}$" | head -n 1) ]]; then
+      if [[ "${os_type}" == "macos" ]]; then
+        # MacOs specific, "sed -i" requires empty file suffix to update file in place, so set "sed -i ''"
+        sudo -- sh -c -e "sed -i '' '/${_hosts_record}/d' /etc/hosts" >/dev/null #2>&1
+      elif [[ "${os_type}" == "linux" ]]; then
+        sudo -- sh -c -e "sed -i '/${_hosts_record}/d' /etc/hosts" >/dev/null #2>&1
+      fi
     fi
   done
 }

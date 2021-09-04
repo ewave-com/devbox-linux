@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -eu
+set -eu       # Normal working mode
+#set -eux     # Verbose debug mode
 
 # 'realpath' might be not installed
 if [[ ! -z "$(which realpath)" ]]; then
@@ -31,6 +32,11 @@ if [[ -z "${selected_project}" ]]; then
   select_project_menu "selected_project"
 fi
 
-start_devbox_project "${selected_project}"
+_no_interaction="0"
+if [[ "${2-''}" == "-n" || "${2-''}" == "--no-interaction" ]]; then
+  _no_interaction="1"
+fi
+
+start_devbox_project "${selected_project}" "${_no_interaction}"
 
 cat ${devbox_root}/tools/print/done.txt

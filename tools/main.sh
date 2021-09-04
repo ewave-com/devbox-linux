@@ -23,6 +23,7 @@ require_once "${devbox_root}/tools/print/print-project-info.sh"
 
 function start_devbox_project() {
   local _selected_project=${1-""}
+  local _no_interaction=${2-"0"}
 
   show_success_message "Starting DevBox project '${_selected_project}'" "1"
 
@@ -50,8 +51,10 @@ function start_devbox_project() {
   # Print final project info
   print_info
 
-  # Run platform tools menu inside web-container
-  run_platform_tools
+  if [[ "${_no_interaction}" == "0" ]]; then
+    # Run platform tools menu inside web-container
+    run_platform_tools
+  fi
 
   # Unset all used variables
   dotenv_unset_variables "${dotenv_infra_filepath}"

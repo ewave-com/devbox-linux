@@ -24,13 +24,15 @@ module DockerSync
                         else
                           'eugenmayer/unison:2.51.3-4.12.0-AMD64'
                         end
-        begin
-          Dependencies::Unison.ensure!
-          Dependencies::Unox.ensure! if Environment.mac?
-        rescue StandardError => e
-          say_status 'error', "#{@sync_name} has been configured to sync with unison, but no unison available", :red
-          say_status 'error', e.message, :red
-          exit 1
+        if !ENV['DOCKER_SYNC_SKIP_DEPENDENCIES_CHECK']
+          begin
+            Dependencies::Unison.ensure!
+            Dependencies::Unox.ensure! if Environment.mac?
+          rescue StandardError => e
+            say_status 'error', "#{@sync_name} has been configured to sync with unison, but no unison available", :red
+            say_status 'error', e.message, :red
+            exit 1
+          end
         end
       end
 
@@ -181,7 +183,6 @@ module DockerSync
         env['HOSTSYNC_ENABLE'] = 0
         env['UNISONSOCKET_ENABLE'] = 1
 
-        force_sync = false # Ewave change
         additional_docker_env = env.map { |key, value| "-e #{key}=\"#{value}\"" }.join(' ')
         running = `docker ps --filter 'status=running' --filter 'name=#{container_name}' --format "{{.Names}}" | grep '^#{container_name}$'`
         if running == ''
@@ -199,9 +200,15 @@ module DockerSync
             say_status 'precopy', cmd, :white if @options['verbose']
             system(cmd) || raise('Precopy failed')
 
+            # Ewave change, add compose label for grouping
+            compose_group_label = ''
+            if ENV['COMPOSE_PROJECT_NAME']
+              compose_group_label = "--label com.docker.compose.project=#{ENV['COMPOSE_PROJECT_NAME']}"
+            end
+            # Ewave change end
+
             say_status 'ok', "creating #{container_name} container", :white if @options['verbose']
-            cmd = "docker run -p '#{@options['sync_host_ip']}::#{UNISON_CONTAINER_PORT}' -v #{volume_name}:#{@options['dest']} -e APP_VOLUME=#{@options['dest']} #{tz_expression} #{additional_docker_env} #{run_privileged} --name #{container_name} -d #{@docker_image}"
-            force_sync = true # Ewave change
+            cmd = "docker run -p '#{@options['sync_host_ip']}::#{UNISON_CONTAINER_PORT}' -v #{volume_name}:#{@options['dest']} -e APP_VOLUME=#{@options['dest']} #{tz_expression} #{additional_docker_env} #{run_privileged} --name #{container_name} #{compose_group_label} -d #{@docker_image}"
           else
             say_status 'ok', "starting #{container_name} container", :white if @options['verbose']
             cmd = "docker start #{container_name} && docker exec #{container_name} supervisorctl restart unison"
@@ -235,7 +242,7 @@ module DockerSync
 
           sleep 1
         end
-        sync(force_sync) # Ewave change, force flag
+        sync()
         say_status 'success', 'Unison server started', :green
       end
 

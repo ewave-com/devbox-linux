@@ -54,7 +54,7 @@ function docker_sync_start() {
       fi
     fi
 
-    docker-sync start --config="${_config_file}" --sync-name="${_sync_name}" --dir="${_working_dir}" --app_name="${_sync_name}" >>"${_working_dir}/${_sync_name}.log"
+    DOCKER_SYNC_SKIP_UPDATE=1 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} docker-sync start --config="${_config_file}" --sync-name="${_sync_name}" --dir="${_working_dir}" --app_name="${_sync_name}" >>"${_working_dir}/${_sync_name}.log"
 
     if [[ "$?" != "0" ]]; then
       show_error_message "Unable to start sync volumes. See docker-sync output above. Process interrupted."
@@ -306,7 +306,7 @@ function show_sync_logs_window() {
       fi
 
       # MacOs specific command to show logs
-      osascript -e "tell application \"Terminal\" to do script \"tail -f $(dirname ${_config_file})/docker-sync/${_sync_name}.log\"" >/dev/null
+      osascript -e "tell application \"Terminal\" to do script \"tail -n 0 -f $(dirname ${_config_file})/docker-sync/${_sync_name}.log\"" >/dev/null
     elif [[ "${os_type}" == "linux" ]]; then
       true # do nothing
     fi
@@ -331,7 +331,7 @@ function close_sync_logs_window() {
 
   for _sync_name in ${_sync_names}; do
     if [[ "${os_type}" == "macos" ]]; then
-      if [[ -n $(ps aux | grep "tail -f .*${_sync_name}.log" | grep -v 'grep' | awk -F" " '{print $2}') ]]; then
+      if [[ -n $(ps aux | grep "tail -n 0 -f .*${_sync_name}.log" | grep -v 'grep' | awk -F" " '{print $2}') ]]; then
         osascript -e "tell application \"Terminal\" to close (every window whose name contains \"tail\" and name contains \"${_sync_name}\")" &
         # native linux killing, in MacOs if just terminates 'tail' process but does not close terminal window
         #ps aux | grep "tail -f .*${_sync_name}.log" | grep -v 'grep' | awk -F" " '{print $2}' | xargs kill -15
