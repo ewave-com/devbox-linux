@@ -34,7 +34,7 @@ function start_watch() {
   restart_required="0"
   while [ ${attempt_no} -le ${max_attempts} ]; do
     if [[ "$(is_main_healthchecker_process)" == "1" ]]; then
-      handle_hanging_unison_proceses "${hanging_unison_hashes[*]}"
+      handle_hanging_unison_processes "${hanging_unison_hashes[*]}"
     fi
 
     for sync_name in ${watched_sync_names}; do
@@ -105,7 +105,7 @@ function is_main_healthchecker_process() {
   echo "0"
 }
 
-function handle_hanging_unison_proceses() {
+function handle_hanging_unison_processes() {
   hanging_unison_hashes=$1
 
   _cycle_possible_hanging_unison_pids=$(ps aux | grep "${process_name} " | grep -v grep | awk -F" " '{if ($3 >= '${cpu_percentage_threshold}') print $2}')

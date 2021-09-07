@@ -7,7 +7,7 @@ require_once "${devbox_root}/tools/system/output.sh"
 # import devbox state function
 require_once "${devbox_root}/tools/devbox/devbox-state.sh"
 # import infrastructure functions
-require_once "${devbox_root}/tools/docker/infrastructure.sh"
+require_once "${devbox_root}/tools/devbox/infrastructure.sh"
 # import docker image functions
 require_once "${devbox_root}/tools/docker/docker-image.sh"
 # import main project functions entrypoint

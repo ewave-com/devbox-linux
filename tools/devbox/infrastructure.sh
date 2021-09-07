@@ -88,7 +88,8 @@ function stop_infrastructure() {
       if [[ "$?" != "0" ]]; then
         show_warning_message "Tip: if you see the error 'UnixHTTPConnectionPool' Unfortunately we can't do anything around this docker problem."
         show_warning_message "The only working solution now is downgrading of Docker to the latest 2.5.* version with complete docker configs removal."
-        show_warning_message "Download link: https://docs.docker.com/docker-for-mac/previous-versions/"
+        show_warning_message "You can download tested version 2.5.0.1: https://desktop.docker.com/mac/stable/49550/Docker.dmg"
+        show_warning_message "Or choose another previous version by the link: https://docs.docker.com/docker-for-mac/previous-versions/"
         exit 1
       fi
 #      (docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}") > /dev/null 2>&1
@@ -142,7 +143,8 @@ function down_infrastructure() {
       if [[ "$?" != "0" ]]; then
         show_warning_message "Tip: if you see the error 'UnixHTTPConnectionPool' Unfortunately we can't do anything around this docker problem."
         show_warning_message "The only working solution now is downgrading of Docker to the latest 2.5.* version with complete docker configs removal."
-        show_warning_message "Download link: https://docs.docker.com/docker-for-mac/previous-versions/"
+        show_warning_message "You can download tested version 2.5.0.1: https://desktop.docker.com/mac/stable/49550/Docker.dmg"
+        show_warning_message "Or choose another previous version by the link: https://docs.docker.com/docker-for-mac/previous-versions/"
         exit 1
       fi
 #      (docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}") > /dev/null 2>&1

@@ -2,6 +2,7 @@ version: "2"
 
 options:
     project_root: config_path
+    assign_sync_to_compose_project: {{COMPOSE_PROJECT_NAME}}
     # devbox_show_logs_for_syncs - comma-separated syncs list to show their logs
     devbox_show_logs_for_syncs: {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync
 
@@ -9,7 +10,7 @@ syncs:
     {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync:
         src: '{{DEVBOX_PROJECT_DIR}}/public_html'
         sync_strategy: 'native'         # Linux specific, WinOs / MacOs specific have 'unison' strategy
-        unison_image: eugenmayer/unison:2.51.3-4.12.0-AMD64
+        unison_image: {{DOCKER_SYNC_UNISON_IMAGE}}
         watch_only: true                # Ewave custom option, skip initial sync expect precopy to run only background watch
         sync_userid: 33                 # desired userid inside target project container
         sync_args:

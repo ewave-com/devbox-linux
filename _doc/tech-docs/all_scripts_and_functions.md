@@ -115,6 +115,77 @@ Check if the state file exist.
 
 ---------------------
 
+## tools/devbox/infrastructure.ps1 (Windows) or tools/devbox/infrastructure.sh (MacOs, Linux)
+
+### Description
+
+This script handles common DevBox infrastructure operations, e.g. start/stop/down portainer, reverse-proxy, mailer, adminer containers.
+Infrastructure starting performed prior project starting. Stopping/downing performed in the end of stopping of all projects (stop/down all menu actions).
+
+### Function list
+#### Public functions:
+
+``` start_infrastructure([string]$_dotenv_filepath = $dotenv_infra_filepath): void```
+Create internal docker network for projects.
+Also start infrastructure services: , check ports are available and start portainer, nginx-reverse-proxy, mailer, adminer.
+
+``` stop_infrastructure([string]$_dotenv_filepath = $dotenv_infra_filepath): void```
+Stop infrastructure services of portainer, nginx-reverse-proxy, mailer, adminer. Remove nginx-reverse-proxy container configs.
+
+``` down_infrastructure([string]$_dotenv_filepath = $dotenv_infra_filepath): void```
+Stop infrastructure services of portainer, nginx-reverse-proxy, mailer, adminer. Remove nginx-reverse-proxy container configs.
+Also remove internal docker network created on starting.
+
+#### Local functions: -
+
+---------------------
+
+
+## tools/devbox/nginx-reverse-proxy.ps1 (Windows) or tools/devbox/nginx-reverse-proxy.sh (MacOs, Linux)
+
+### Description
+
+The script handles common actions with infrastructure nginx-reverse-proxy container, for example adding/removal of website configs, certificates.
+
+### Function list
+#### Public functions:
+
+``` nginx_reverse_proxy_restart(): void```
+Restart nginx-reverse-proxy container.
+
+``` nginx_reverse_proxy_add_website([string]$_website_config_path, [string]$_crt_file_name, [string]$_key_file_name = ""): void```
+Add new website configuration for reverse proxy. It adds the website conf file into nginx configuration directory.
+Also can add the given SSL certificate file paths for HTTPS.
+
+``` nginx_reverse_proxy_remove_project_website([string]$_website_host_name, [string]$_crt_file_name): void```
+Removes website configuration from nginx reverse proxy by the website domain name and cert file name.
+
+#### Local functions: -
+
+``` nginx_reverse_proxy_prepare_common_folders(): void```
+Creates required nginx-reverse-proxy runtime directories and set the proper permissions.
+Directories: nginx-reverse-proxy/run/conf.d/, nginx-reverse-proxy/run/logs/, nginx-reverse-proxy/run/ssl/.
+
+``` nginx_reverse_proxy_add_website_config([string]$_website_config_path): void```
+Copy the given full path of website conf into the working nginx 'nginx-reverse-proxy/run/conf.d/' directory.
+
+``` nginx_reverse_proxy_remove_website_config([string]$_website_config_filename): void```
+Remove the website config by file name from 'nginx-reverse-proxy/run/conf.d/'.
+
+``` nginx_reverse_proxy_add_website_ssl_cert([string]$_source_crt_path, [string]$_source_key_path = ''): void```
+Copy SSL certificate file path into 'nginx-reverse-proxy/run/ssl/'.
+If $_source_key_path is empty - try to copy *.key file with the same basename as for *.crt. Or ignore if missing.
+
+``` nginx_reverse_proxy_remove_website_ssl_cert([string]$_crt_file_name, [string]$_key_file_name): void```
+Remove the certificate file by file name from 'nginx-reverse-proxy/run/ssl/'.
+If $_key_file_name is empty - try to remove *.key file with the same basename as for *.crt. Or ignore if missing.
+
+``` nginx_reverse_proxy_remove_website_logs([string]$_website_host_name): void```
+Remove website log files from 'nginx-reverse-proxy/run/logs/' based on website host name.
+
+
+---------------------
+
 ## tools/docker/docker.ps1 (Windows) or tools/docker/docker.sh (MacOs, Linux)
 
 ### Description
@@ -330,7 +401,7 @@ Also it cleans log file in case its size becomes greater that 10mB.
 Checks if current sync health-checker instance is the main process, it means first it was started first.
 This is required to avoid single handling of hanging unison processes. 
 
-``` handle_hanging_unison_proceses([string]$--------------------): void```
+``` handle_hanging_unison_processes([string]$--------------------): void```
 This function tries to detect is unison process hanging.
 After the first detection of high CPU utilization by unison process it is marked as reset candidate.
 High utilization means CPU usage greater than threshold 95% for one core as unison is single-core process.
@@ -341,32 +412,6 @@ and sync will be restarted by the nearest pid-file check.
 
 ---------------------
 
-## tools/docker/infrastructure.ps1 (Windows) or tools/docker/infrastructure.sh (MacOs, Linux)
-
-### Description
-
-This script handles common DevBox infrastructure operations, e.g. start/stop/down portainer, reverse-proxy, mailer, adminer containers.
-Infrastructure starting performed prior project starting. Stopping/downing performed in the end of stopping of all projects (stop/down all menu actions).
-
-### Function list
-#### Public functions:
-
-``` start_infrastructure([string]$_dotenv_filepath = $dotenv_infra_filepath): void```
-Create internal docker network for projects.
-Also start infrastructure services: , check ports are available and start portainer, nginx-reverse-proxy, mailer, adminer. 
-
-``` stop_infrastructure([string]$_dotenv_filepath = $dotenv_infra_filepath): void```
-Stop infrastructure services of portainer, nginx-reverse-proxy, mailer, adminer. Remove nginx-reverse-proxy container configs.
-
-``` down_infrastructure([string]$_dotenv_filepath = $dotenv_infra_filepath): void```
-Stop infrastructure services of portainer, nginx-reverse-proxy, mailer, adminer. Remove nginx-reverse-proxy container configs.
-Also remove internal docker network created on starting.
-
-#### Local functions: -
-
-
-
----------------------
 
 ## tools/docker/network.ps1 (Windows) or tools/docker/network.sh (MacOs, Linux)
 
@@ -388,52 +433,6 @@ Remove internal docker network name.
 Return internal docker network name.
 
 #### Local functions: -
-
-
-
----------------------
-
-## tools/docker/nginx-reverse-proxy.ps1 (Windows) or tools/docker/nginx-reverse-proxy.sh (MacOs, Linux)
-
-### Description
-
-The script handles common actions with infrastructure nginx-reverse-proxy container, for example adding/removal of website configs, certificates.
-
-### Function list
-#### Public functions:
-
-``` nginx_reverse_proxy_restart(): void```
-Restart nginx-reverse-proxy container.
-
-``` nginx_reverse_proxy_add_website([string]$_website_config_path, [string]$_crt_file_name, [string]$_key_file_name = ""): void```
-Add new website configuration for reverse proxy. It adds the website conf file into nginx configuration directory.
-Also can add the given SSL certificate file paths for HTTPS. 
-
-``` nginx_reverse_proxy_remove_project_website([string]$_website_host_name, [string]$_crt_file_name): void```
-Removes website configuration from nginx reverse proxy by the website domain name and cert file name. 
-
-#### Local functions: -
-
-``` nginx_reverse_proxy_prepare_common_folders([string]$--------------------): void```
-Creates required nginx-reverse-proxy runtime directories and set the proper permissions.
-Directories: nginx-reverse-proxy/run/conf.d/, nginx-reverse-proxy/run/logs/, nginx-reverse-proxy/run/ssl/.
-
-``` nginx_reverse_proxy_add_website_config([string]$_website_config_path): void```
-Copy the given full path of website conf into the working nginx 'nginx-reverse-proxy/run/conf.d/' directory.
-
-``` nginx_reverse_proxy_remove_website_config([string]$_website_config_filename): void```
-Remove the website config by file name from 'nginx-reverse-proxy/run/conf.d/'.
-
-``` nginx_reverse_proxy_add_website_ssl_cert([string]$_source_crt_path, [string]$_source_key_path = ''): void```
-Copy SSL certificate file path into 'nginx-reverse-proxy/run/ssl/'.
-If $_source_key_path is empty - try to copy *.key file with the same basename as for *.crt. Or ignore if missing.  
-
-``` nginx_reverse_proxy_remove_website_ssl_cert([string]$_crt_file_name, [string]$_key_file_name): void```
-Remove the certificate file by file name from 'nginx-reverse-proxy/run/ssl/'.
-If $_key_file_name is empty - try to remove *.key file with the same basename as for *.crt. Or ignore if missing. 
-
-``` nginx_reverse_proxy_remove_website_logs([string]$_website_host_name): void```
-Remove website log files from 'nginx-reverse-proxy/run/logs/' based on website host name.
 
 
 
@@ -739,8 +738,8 @@ Ensure static ports mentioned in the .env are available or throw an error to pre
 Check if static ports mentioned in the .env are available or generate new dynamic ports to use.
 Also update some docker-sync params.
 
-``` add_static_dir_paths_for_docker_sync([string]$_env_filepath = "${project_up_dir}/.env"): void```
-Append the generated full paths of main project dirs into 'docker-up/.env' for proper docker-sync path resolving.
+``` add_internal_generated_prams([string]$_env_filepath = "${project_up_dir}/.env"): void```
+Append the internal generated params to the 'docker-up/.env'.
 
 ``` evaluate_expression_values([string]$_env_filepath = "${project_up_dir}/.env"): void```
 Evaluate param values which are presented through other params.
@@ -907,8 +906,8 @@ Install git package to the host system.
 ``` install_composer(): void```
 Install git package to the host system.
 
-``` install_extra_packages(): void```
-Install other packages like openssl, etc..
+``` install_common_software(): void```
+Install common system packages like openssl, wget, etc.
 
 ``` register_devbox_scripts_globally(): void```
 Makes main entrypoint scripts callable and adds DevBox directory to the system PATH to have a possibility to run docker from any directory.

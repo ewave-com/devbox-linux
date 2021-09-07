@@ -2,6 +2,7 @@ version: "2"
 
 options:
     project_root: config_path
+    assign_sync_to_compose_project: {{COMPOSE_PROJECT_NAME}}
 
 syncs:
     {{PROJECT_NAME}}_{{CONTAINER_ELASTICSEARCH_NAME}}_data_sync:

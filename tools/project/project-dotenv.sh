@@ -54,7 +54,7 @@ function prepare_project_dotenv_file() {
   merge_defaults "${project_up_dir}/.env"
   add_computed_params "${project_up_dir}/.env"
   evaluate_expression_values "${project_up_dir}/.env"
-  add_static_dir_paths_for_docker_sync "${project_up_dir}/.env"
+  add_internal_generated_prams "${project_up_dir}/.env"
 
   current_env_filepath=""
 }
@@ -303,7 +303,7 @@ function add_computed_params() {
 }
 
 # add static dir paths required for docker-sync mounting
-function add_static_dir_paths_for_docker_sync() {
+function add_internal_generated_prams() {
   local _env_filepath=${1-"${project_up_dir}/.env"}
 
   if [[ -z "$(dotenv_get_param_value 'DEVBOX_PROJECT_DIR')" ]]; then
@@ -350,6 +350,15 @@ function add_static_dir_paths_for_docker_sync() {
       if [[ -n "${_node_modules_relative_path}" ]]; then
         dotenv_set_param_value 'NODE_MODULES_REL_PATH' "${_node_modules_relative_path}/"
       fi
+    fi
+  fi
+
+  # evaluate used docker-sync docker image for unison
+  if [[ -z "$(dotenv_get_param_value 'DOCKER_SYNC_UNISON_IMAGE')" ]]; then
+    if [[ ${arch_type} == 'arm64' ]]; then
+      dotenv_set_param_value 'DOCKER_SYNC_UNISON_IMAGE' "eugenmayer/unison:2.51.3-4.12.0-ARM64"
+    else
+      dotenv_set_param_value 'DOCKER_SYNC_UNISON_IMAGE' "eugenmayer/unison:2.51.3-4.12.0-AMD64"
     fi
   fi
 }
