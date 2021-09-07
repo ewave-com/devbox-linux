@@ -38,6 +38,25 @@ function get_os_type() {
 
 export os_type=$(get_os_type)
 
+function get_arch_type() {
+  local _cpu_arch
+  local _proc_info="$(uname -p)"
+
+  if [[ "${_proc_info}" == x86_64* || "${_proc_info}" == "amd64" ]]; then
+    _cpu_arch="x64"
+  elif [[ "${_proc_info}" == i?86 ]]; then
+    _cpu_arch="x32"
+  elif [[ "${_proc_info}" == arm* ]]; then
+    _cpu_arch="arm64"
+  else
+    _cpu_arch="unknown"
+  fi
+
+  echo "${_cpu_arch}"
+}
+
+export arch_type=$(get_arch_type)
+
 # Set color variable
 #DARKGRAY='\033[1;30m'
 RED='\033[0;31m'

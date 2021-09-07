@@ -2,7 +2,7 @@
 
 require_once "${devbox_root}/tools/system/file.sh"
 require_once "${devbox_root}/tools/project/project-dotenv.sh"
-require_once "${devbox_root}/tools/docker/nginx-reverse-proxy.sh"
+require_once "${devbox_root}/tools/devbox/nginx-reverse-proxy.sh"
 require_once "${devbox_root}/tools/system/ssl.sh"
 require_once "${devbox_root}/tools/system/output.sh"
 

@@ -11,12 +11,12 @@ export devbox_env_path_updated="0"
 function install_dependencies() {
   show_success_message "Validating software dependencies"
 
+  install_common_software
   install_docker
   install_docker_sync
-#  install_unison # not needed because of native sync, you can install and try to use it, but this way was not tested
+#  install_unison # not needed because of native sync, you can install and try to use it, but stable work wasn't tested
   install_git
   install_composer
-  install_extra_packages
   register_devbox_scripts_globally
 
   if [[ "${devbox_env_path_updated}" == "1" ]]; then
@@ -185,7 +185,7 @@ function install_composer() {
   fi
 }
 
-function install_extra_packages() {
+function install_common_software() {
   if [[ -z "$(which openssl)" ]]; then
     sudo apt-get install -y install openssl >/dev/null
   fi

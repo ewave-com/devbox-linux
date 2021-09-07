@@ -54,7 +54,10 @@ function docker_sync_start() {
       fi
     fi
 
-    DOCKER_SYNC_SKIP_UPDATE=1 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} docker-sync start --config="${_config_file}" --sync-name="${_sync_name}" --dir="${_working_dir}" --app_name="${_sync_name}" >>"${_working_dir}/${_sync_name}.log"
+    local _compose_project_name
+    _compose_project_name="$(get_config_file_option ${_config_file} 'assign_sync_to_compose_project')"
+
+    DOCKER_SYNC_SKIP_UPDATE=1 COMPOSE_PROJECT_NAME="${_compose_project_name}" docker-sync start --config="${_config_file}" --sync-name="${_sync_name}" --dir="${_working_dir}" --app_name="${_sync_name}" >>"${_working_dir}/${_sync_name}.log"
 
     if [[ "$?" != "0" ]]; then
       show_error_message "Unable to start sync volumes. See docker-sync output above. Process interrupted."
