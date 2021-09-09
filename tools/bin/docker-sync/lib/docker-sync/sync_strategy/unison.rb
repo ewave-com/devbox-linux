@@ -185,6 +185,7 @@ module DockerSync
 
         additional_docker_env = env.map { |key, value| "-e #{key}=\"#{value}\"" }.join(' ')
         running = `docker ps --filter 'status=running' --filter 'name=#{container_name}' --format "{{.Names}}" | grep '^#{container_name}$'`
+        sleep_seconds = 0 # Ewave change
         if running == ''
           say_status 'ok', "#{container_name} container not running", :white if @options['verbose']
           exists = `docker ps --filter "status=exited" --filter "name=#{container_name}" --format "{{.Names}}" | grep '^#{container_name}$'`
@@ -209,6 +210,7 @@ module DockerSync
 
             say_status 'ok', "creating #{container_name} container", :white if @options['verbose']
             cmd = "docker run -p '#{@options['sync_host_ip']}::#{UNISON_CONTAINER_PORT}' -v #{volume_name}:#{@options['dest']} -e APP_VOLUME=#{@options['dest']} #{tz_expression} #{additional_docker_env} #{run_privileged} --name #{container_name} #{compose_group_label} -d #{@docker_image}"
+            sleep_seconds = 2 # Ewave change
           else
             say_status 'ok', "starting #{container_name} container", :white if @options['verbose']
             cmd = "docker start #{container_name} && docker exec #{container_name} supervisorctl restart unison"
@@ -219,6 +221,10 @@ module DockerSync
         end
         say_status 'command', cmd, :white if @options['verbose']
         `#{cmd}` || raise('Start failed')
+        if sleep_seconds  # Ewave change, unison in container might be not running yet, sleep 2 seconds, otherwise confusing error appear
+            sleep(sleep_seconds)
+        end
+
         say_status 'ok', "starting initial sync of #{container_name}", :white if @options['verbose']
         # wait until container is started, then sync:
         sync_host_port = get_host_port(get_container_name, UNISON_CONTAINER_PORT)
