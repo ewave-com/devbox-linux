@@ -162,7 +162,9 @@ function install_composer() {
   fi
 
   if [ -z "${_composer_version}" ]; then
-    sudo apt-get install -y php
+    if [[ -z "${which php}" ]]; then
+      sudo apt-get install -y php >/dev/null
+    fi
 
     run_composer_installer
 
