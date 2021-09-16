@@ -187,15 +187,15 @@ function install_composer() {
 
 function install_common_software() {
   if [[ -z "$(which openssl)" ]]; then
-    sudo apt-get install -y install openssl >/dev/null
+    sudo apt-get install -y openssl >/dev/null
   fi
 
   if [[ -z "$(which jq)" ]]; then
-    sudo apt-get install -y install jq >/dev/null
+    sudo apt-get install -y jq >/dev/null
   fi
 
   if [[ -z "$(which setfacl)" ]]; then
-    sudo apt-get install -y install acl >/dev/null
+    sudo apt-get install -y acl >/dev/null
   fi
 }
 
