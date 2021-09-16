@@ -53,7 +53,7 @@ function install_docker() {
 
   if [[ -z "${_docker_location}" || -z "${_docker_compose_location}" ]]; then
     # Removing docker-engine if exists
-    sudo apt-get -y remove docker docker-engine docker.io >/dev/null                                                                                                  #2>&1
+    sudo apt-get -y remove docker docker-engine docker.io >/dev/null 2>&1
     # Install prerequisites to install docker
     sudo apt-get install -y apt-transport-https ca-certificates curl jq software-properties-common net-tools wget mc htop dstat libnss3-tools jq net-tools >/dev/null #2>&1
     # Add repo docker CE
