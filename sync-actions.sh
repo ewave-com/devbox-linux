@@ -34,6 +34,8 @@ if [[ -z "${_selected_sync_action}" ]]; then
   select_sync_action_menu "_selected_sync_action"
 fi
 
+start_docker_if_not_running
+
 case $_selected_sync_action in
 "start_sync")
   if [[ -z "${_selected_project}" ]]; then

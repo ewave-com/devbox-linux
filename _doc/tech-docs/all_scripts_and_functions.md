@@ -227,6 +227,10 @@ $_find_exact_match - true for strict regexp search like "^name$", false - for so
 Stop all working containers, kill all not stopped containers, remove all existing containers.
 As well as prune volumes and prune system docker runtime data. 
 
+``` start_docker_if_not_running(): void```
+Checks if docker application is running or start it otherwise. Also wait for start complete during the defined timeout (30 sec) 
+
+
 #### Local functions: -
 
 

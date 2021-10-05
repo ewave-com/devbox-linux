@@ -353,7 +353,7 @@ function add_internal_generated_prams() {
     fi
   fi
 
-  # evaluate used docker-sync docker image for unison
+  # define used docker-sync docker image for unison
   if [[ -z "$(dotenv_get_param_value 'DOCKER_SYNC_UNISON_IMAGE')" ]]; then
     if [[ ${arch_type} == 'arm64' ]]; then
       dotenv_set_param_value 'DOCKER_SYNC_UNISON_IMAGE' "eugenmayer/unison:2.51.3-4.12.0-ARM64"

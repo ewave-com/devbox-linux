@@ -9,8 +9,9 @@ services:
             - "{{CONTAINER_ELASTICSEARCH_PORT}}:9200"
         environment:
             - cluster.name=webserver_default
-            - bootstrap.memory_lock=true
-            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+            - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+            - "ES_SETTING_BOOTSTRAP_MEMORY__LOCK=false"
+            - "discovery.type=single-node"
             - "http.host=0.0.0.0"
             - "transport.host=127.0.0.1"
             - "xpack.security.enabled=false"

@@ -3,6 +3,8 @@
 require_once "${devbox_root}/tools/system/constants.sh"
 require_once "${devbox_root}/tools/system/output.sh"
 require_once "${devbox_root}/tools/system/file.sh"
+require_once "${devbox_root}/tools/docker/docker.sh"
+require_once "${devbox_root}/tools/devbox/devbox-state.sh"
 
 ############################ Public functions ############################
 
@@ -52,29 +54,40 @@ function install_docker() {
   fi
 
   if [[ -z "${_docker_location}" || -z "${_docker_compose_location}" ]]; then
+    show_success_message "Installing Docker. Please wait"
     # Removing docker-engine if exists
-
     if [[ ! -z $(which docker) ]]; then sudo apt-get -y remove docker >/dev/null; fi
     if [[ ! -z $(which docker-engine) ]]; then sudo apt-get -y docker-engine >/dev/null; fi
     if [[ ! -z $(which docker.io) ]]; then sudo apt-get -y remove docker.io >/dev/null; fi
+
     # Install prerequisites to install docker
-    sudo apt-get install -y apt-transport-https ca-certificates curl jq software-properties-common net-tools wget mc htop dstat libnss3-tools jq net-tools >/dev/null #2>&1
+    sudo apt-get -qq update >/dev/null
+    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common net-tools wget mc htop dstat libnss3-tools net-tools >/dev/null #2>&1
     # Add repo docker CE
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" >/dev/null #2>&1
-    # Install docker gpg key
-    sudo curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" | sudo apt-key add - >/dev/null      #2>&1
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    if [[ -f /etc/apt/sources.list.d/docker.list ]]; then
+      sudo rm /etc/apt/sources.list.d/docker.list
+    fi
+#    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" >/dev/null #2>&1
+#    sudo curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" | sudo apt-key add - >/dev/null      #2>&1
     #Install docker-ce
-    sudo apt-get -qq update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io >/dev/null #2>&1
+    sudo apt-get -qq update >/dev/null && sudo apt-get install -y docker-ce docker-ce-cli containerd.io >/dev/null #2>&1
     #Install last version docker-compose
     if [[ ! -f /usr/local/bin/docker-compose ]]; then
-      docker_compose_version=$(curl --silent "https://api.github.com/repos/docker/compose/releases/latest" | jq .name -r)
-      sudo curl -q -L "https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m)" \
+      docker_compose_version="1.29.2" # latest version before compose v2
+#      docker_compose_version=$(curl --silent "https://api.github.com/repos/docker/compose/releases/latest" | jq .name -r)
+      sudo curl -qs -L "https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m)" \
         -o /usr/local/bin/docker-compose \
         >/dev/null #2>&1
       sudo chmod +x /usr/local/bin/docker-compose
     fi
     # Set permission
     sudo usermod -a -G docker "${host_user}"
+
+    if [[ -d "/home/${host_user}/.docker" ]]; then
+      mkdir -p "/home/${host_user}/.docker"
+    fi
     sudo chown "${host_user}":"${host_user_group}" "/home/${host_user}/.docker" -R >/dev/null #2>&1
     sudo chmod g+rwx "/home/${host_user}/.docker" -R >/dev/null                               #2>&1
   fi
@@ -82,6 +95,8 @@ function install_docker() {
   if [[ -z $(echo "$(groups)" | grep "docker") ]]; then
     sudo usermod -a -G docker "${host_user}"
   fi
+
+  start_docker_if_not_running
 }
 
 function install_docker_sync() {

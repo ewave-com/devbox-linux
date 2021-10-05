@@ -7,7 +7,7 @@ require_once "${devbox_root}/tools/system/file.sh"
 ############################ Public functions ############################
 
 function nginx_reverse_proxy_restart() {
-  (docker restart nginx-reverse-proxy &) >/dev/null
+  docker restart nginx-reverse-proxy --time 10 >/dev/null
 }
 
 function nginx_reverse_proxy_add_website() {
@@ -48,12 +48,20 @@ function nginx_reverse_proxy_remove_project_website() {
 ############################ Local functions ############################
 
 function nginx_reverse_proxy_prepare_common_folders() {
-  mkdir -p "${devbox_infra_dir}/nginx-reverse-proxy/run"
-  sudo chown -R "${host_user}":"${host_user_group}" "${devbox_infra_dir}/nginx-reverse-proxy/run"
+  if [[ ! -d "${devbox_infra_dir}/nginx-reverse-proxy/run" ]]; then
+    mkdir -p "${devbox_infra_dir}/nginx-reverse-proxy/run"
+    sudo chown -R "${host_user}":"${host_user_group}" "${devbox_infra_dir}/nginx-reverse-proxy/run"
+  fi
 
-  mkdir -p "${devbox_infra_dir}/nginx-reverse-proxy/run/conf.d/"
-  mkdir -p "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/"
-  mkdir -p "${devbox_infra_dir}/nginx-reverse-proxy/run/ssl/"
+  if [[ ! -d "${devbox_infra_dir}/nginx-reverse-proxy/run/conf.d/" ]]; then
+    mkdir -p "${devbox_infra_dir}/nginx-reverse-proxy/run/conf.d/"
+  fi
+  if [[ ! -d "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/" ]]; then
+    mkdir -p "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/"
+  fi
+  if [[ ! -d "${devbox_infra_dir}/nginx-reverse-proxy/run/ssl/" ]]; then
+    mkdir -p "${devbox_infra_dir}/nginx-reverse-proxy/run/ssl/"
+  fi
 }
 
 function nginx_reverse_proxy_add_website_config() {
