@@ -121,4 +121,40 @@ function destroy_all_docker_services() {
   docker system prune --force
 }
 
+function start_docker_if_not_running() {
+  if [[ "${os_type}" == "macos" ]]; then
+
+    if [[ -z $(ps aux | grep "/Applications/Docker.app" | grep -v "grep") ]]; then
+      show_success_message "Starting Docker application" "2"
+      open "/Applications/Docker.app"
+    fi
+
+    set +e
+    if ! $(docker ps >/dev/null 2>&1); then
+      show_success_message "Waiting for Docker start completion. Please wait..."
+      local _start_timeout_sec=30
+      local _attempts=0
+      while ! docker ps >/dev/null 2>&1; do
+        printf "."
+        if [[ ((_attempts -gt _start_timeout_sec)) ]]; then
+          show_error_message "Docker starting process exceeded ${_start_timeout_sec} seconds timeout. Please start docker manually and try again"
+          exit
+        fi
+        sleep 1
+        ((_attempts++))
+      done
+      printf "Done \n"
+    fi
+    set -e
+
+  elif [[ "${os_type}" == "linux" ]]; then
+
+    if [[ "$(systemctl show --property ActiveState docker)" != "ActiveState=active" ]]; then
+      sudo systemctl start docker
+      sleep 3
+    fi
+
+  fi
+}
+
 ############################ Public functions end ############################

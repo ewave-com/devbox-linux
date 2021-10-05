@@ -37,6 +37,8 @@ if [[ "${2-''}" == "-n" || "${2-''}" == "--no-interaction" ]]; then
   _no_interaction="1"
 fi
 
+start_docker_if_not_running
+
 start_devbox_project "${selected_project}" "${_no_interaction}"
 
 cat ${devbox_root}/tools/print/done.txt

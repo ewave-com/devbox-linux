@@ -250,9 +250,11 @@ function find_port_across_docker_containers() {
     exit 1
   fi
 
-  local _containers_port
+  local _containers_port=''
   if [[ -z "${_container_name}" ]]; then
-    _containers_port=$(docker inspect --format='{{json .HostConfig.PortBindings}}' $(docker ps -aq) | jq -r '.[]?[0].HostPort | values' | grep -E "^${_checked_port}$" | sort -g -r | head -n 1)
+    if [[ ! -z "$(docker ps -aq)" ]]; then
+      _containers_port=$(docker inspect --format='{{json .HostConfig.PortBindings}}' $(docker ps -aq) | jq -r '.[]?[0].HostPort | values' | grep -E "^${_checked_port}$" | sort -g -r | head -n 1)
+    fi
   else
     _containers_port=$(docker inspect --format='{{json .HostConfig.PortBindings}}' "${_container_name}" | jq -r '.[]?[0].HostPort | values' | grep -E "^${_checked_port}$" | sort -g -r | head -n 1)
   fi

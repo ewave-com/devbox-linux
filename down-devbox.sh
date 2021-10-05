@@ -36,6 +36,8 @@ if [[ -z "${_selected_down_type}" ]]; then
   select_down_type_menu "_selected_down_type"
 fi
 
+start_docker_if_not_running
+
 case $_selected_down_type in
 "stop_one")
   if [[ -z "${_selected_project}" ]]; then
