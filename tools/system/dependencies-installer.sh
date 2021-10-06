@@ -75,7 +75,7 @@ function install_docker() {
     sudo apt-get -qq update >/dev/null && sudo apt-get install -y docker-ce docker-ce-cli containerd.io >/dev/null #2>&1
     #Install last version docker-compose
     if [[ ! -f /usr/local/bin/docker-compose ]]; then
-      docker_compose_version="1.29.2" # latest version before compose v2
+      docker_compose_version="1.29.2" # latest stable version before experimental compose v2
 #      docker_compose_version=$(curl --silent "https://api.github.com/repos/docker/compose/releases/latest" | jq .name -r)
       sudo curl -qs -L "https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m)" \
         -o /usr/local/bin/docker-compose \
