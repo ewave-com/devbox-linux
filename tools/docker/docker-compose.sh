@@ -2,6 +2,7 @@
 
 require_once "${devbox_root}/tools/system/constants.sh"
 require_once "${devbox_root}/tools/system/output.sh"
+require_once "${devbox_root}/tools/devbox/devbox-state.sh"
 
 ############################ Public functions ############################
 
@@ -10,7 +11,12 @@ function docker_compose_up() {
   local _env_filepath=${2-"${project_up_dir}/.env"}
   local _log_level=${3-"${docker_compose_log_level}"}
 
-  show_success_message "Starting containers for docker-compose config '$(basename ${_compose_filepath})'" "3"
+  local _compose_version=$(get_docker_compose_version)
+  if [[ "${_compose_version}" == "1" ]]; then
+    show_success_message "Starting containers for docker-compose config '$(basename ${_compose_filepath})'" "3"
+  else
+    show_success_message "Starting containers for docker compose config '$(basename ${_compose_filepath})'" "3"
+  fi
 
   if [[ ! -f "${_compose_filepath}" ]]; then
     show_error_message "Unable to start containers. Docker-compose yml file not found at path  '${_compose_filepath}', related .env file: '${_env_filepath}'."
@@ -31,11 +37,22 @@ function docker_compose_up() {
   # don't catch the command output as Docker ignores regular stdout/stderr threads, they started this just in Docker 4+
   # and there is no valid vay to catch the error message without breaking the whole output
   # so we only guess to possible error
-  docker-compose \
-    --file "${_compose_filepath}" \
-    ${_env_file_option} \
-    --log-level "${docker_compose_log_level}" \
-    up --detach
+
+  if [[ "${_compose_version}" == "1" ]]; then
+    docker-compose \
+      --file "${_compose_filepath}" \
+      ${_env_file_option} \
+      --log-level "${docker_compose_log_level}" \
+      up --detach
+  else
+    # todo return log-level between 'docker' and 'compose' command parts back for linux implementation once it is fixed by docker.
+    # Current docker v20.10.9 still has log-level missing for linux, but macos v20.10.8 has the flag supported.
+    # --log-level "${docker_compose_log_level}" \
+    docker compose \
+        --file "${_compose_filepath}" \
+        ${_env_file_option} \
+        up --detach
+  fi
 
   _exit_code="$?"
   set -e
@@ -58,7 +75,12 @@ function docker_compose_stop() {
   local _env_filepath=${2-"${project_up_dir}/.env"}
   local _log_level=${3-"${docker_compose_log_level}"}
 
-  show_success_message "Stopping containers for docker-compose config '$(basename ${_compose_filepath})'" "3"
+  local _compose_version=$(get_docker_compose_version)
+  if [[ "${_compose_version}" == "1" ]]; then
+    show_success_message "Stopping containers for docker-compose config '$(basename ${_compose_filepath})'" "3"
+  else
+    show_success_message "Stopping containers for docker compose config '$(basename ${_compose_filepath})'" "3"
+  fi
 
   if [[ ! -f "${_compose_filepath}" ]]; then
     show_error_message "Unable to stop containers. Docker-compose yml file not found at path  '${_compose_filepath}', related .env file: '${_env_filepath}'."
@@ -75,11 +97,22 @@ function docker_compose_stop() {
     _env_file_option="--env-file ${_env_filepath}"
   fi
 
-  docker-compose \
-    --file "${_compose_filepath}" \
-    ${_env_file_option} \
-    --log-level "${docker_compose_log_level}" \
-    stop
+  if [[ "${_compose_version}" == "1" ]]; then
+    docker-compose \
+      --file "${_compose_filepath}" \
+      ${_env_file_option} \
+      --log-level "${docker_compose_log_level}" \
+      stop
+  else
+    # todo return log-level between 'docker' and 'compose' command parts back for linux implementation once it is fixed by docker.
+    # Current docker v20.10.9 still has log-level missing for linux, but macos v20.10.8 has the flag supported.
+    # --log-level "${docker_compose_log_level}" \
+    docker \
+      compose \
+      --file "${_compose_filepath}" \
+      ${_env_file_option} \
+      stop
+  fi
 
   if [[ "$?" != "0" ]]; then
     show_error_message "Unable to stop containers. See docker-compose output above. Process interrupted."
@@ -94,7 +127,12 @@ function docker_compose_down() {
   local _clean_volumes=${3-"0"}
   local _log_level=${4-"${docker_compose_log_level}"}
 
-  show_success_message "Downing docker containers for compose config '$(basename ${_compose_filepath})'" "3"
+  local _compose_version=$(get_docker_compose_version)
+  if [[ "${_compose_version}" == "1" ]]; then
+    show_success_message "Downing containers for docker-compose config '$(basename ${_compose_filepath})'" "3"
+  else
+    show_success_message "Downing containers for docker compose config '$(basename ${_compose_filepath})'" "3"
+  fi
 
   if [[ ! -f "${_compose_filepath}" ]]; then
     show_error_message "Unable to down containers. Docker-compose yml file not found at path  '${_compose_filepath}'."
@@ -111,18 +149,37 @@ function docker_compose_down() {
     _env_file_option="--env-file ${_env_filepath}"
   fi
 
-  if [[ "${_clean_volumes}" == "1" ]]; then
-    COMPOSE_HTTP_TIMEOUT=10 docker-compose \
-      --file "${_compose_filepath}" \
-      ${_env_file_option} \
-      --log-level "${docker_compose_log_level}" \
-      down --volumes --timeout 10
+  if [[ "${_compose_version}" == "1" ]]; then
+    if [[ "${_clean_volumes}" == "1" ]]; then
+      COMPOSE_HTTP_TIMEOUT=10 docker-compose \
+        --file "${_compose_filepath}" \
+        ${_env_file_option} \
+        --log-level "${docker_compose_log_level}" \
+        down --volumes --timeout 10
+    else
+      COMPOSE_HTTP_TIMEOUT=10 docker-compose \
+        --file "${_compose_filepath}" \
+        ${_env_file_option} \
+        --log-level "${docker_compose_log_level}" \
+        down --timeout 10
+    fi
   else
-    COMPOSE_HTTP_TIMEOUT=10 docker-compose \
-      --file "${_compose_filepath}" \
-      ${_env_file_option} \
-      --log-level "${docker_compose_log_level}" \
-      down --timeout 10
+    # todo return log-level between 'docker' and 'compose' command parts back for linux implementation once it is fixed by docker.
+    # Current docker v20.10.9 still has log-level missing for linux, but macos v20.10.8 has the flag supported.
+    # --log-level "${docker_compose_log_level}" \
+    if [[ "${_clean_volumes}" == "1" ]]; then
+      COMPOSE_HTTP_TIMEOUT=10 docker \
+        compose \
+        --file "${_compose_filepath}" \
+        ${_env_file_option} \
+        down --volumes --timeout 10
+    else
+      COMPOSE_HTTP_TIMEOUT=10 docker \
+        compose \
+        --file "${_compose_filepath}" \
+        ${_env_file_option} \
+        down --timeout 10
+    fi
   fi
 
   if [[ "$?" != "0" ]]; then
@@ -205,3 +262,35 @@ function docker_compose_down_and_clean_all_directory_services() {
 }
 
 ############################ Public functions end ############################
+
+
+############################ Local functions ############################
+
+function get_docker_compose_version() {
+  local _compose_version
+  _compose_version=$(devbox_state_get_param_value "docker_compose_version")
+
+  if [[ ! -z "${_compose_version}" ]]; then
+    echo "${_compose_version}"
+    return
+  fi
+
+  # check v2 "docker compose" command namespace without dash - new compose implementation
+  if [[ ! -z $(docker --help | grep -i compose) ]]; then
+    devbox_state_set_param_value "docker_compose_version" "2"
+    echo "2"
+    return
+  fi
+
+  if [[ ! -z "$(which docker-compose)" && ! -z $(echo "$(docker-compose -v)" | grep -E 'version\ v?1\.') ]]; then
+    #output example: "docker-compose version 1.29.2, build 5becea4c"
+    devbox_state_set_param_value "docker_compose_version" "1"
+    echo "1"
+    return
+  fi
+
+  show_error_message "Docker compose version is not recognized. Please contact DevBox developers."
+  exit
+}
+
+############################ Local functions end ############################
