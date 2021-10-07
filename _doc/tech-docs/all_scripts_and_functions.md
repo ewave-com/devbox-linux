@@ -275,7 +275,11 @@ Down containers from all docker-compose-*.yml files in directory $_working_direc
 ``` docker_compose_down_and_clean_all_directory_services([string]$_working_directory, [string]$_env_filepath = "$_working_directory/.env", [string]$_log_level = $docker_compose_log_level): void```
 Down containers and remove volumes from all docker-compose-*.yml files in directory $_working_directory  using the dotenv file at path $_env_filepath and with docker log level $_log_level.
 
-#### Local functions: -
+#### Local functions:
+
+``` get_docker_compose_version(): string```
+Detect if the 'compose' package version is standalone 'docker-compose' package (compose <2.0) or 
+it is new implementation of compose plugin as part of docker package (compose >=2.0).
 
 
 ---------------------

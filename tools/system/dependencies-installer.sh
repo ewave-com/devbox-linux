@@ -40,7 +40,7 @@ function install_dependencies() {
 function install_docker() {
   local _docker_location=$(which docker)
   local _docker_compose_location=$(which docker-compose)
-  if [[ -n "${_docker_compose_location}" ]]; then
+  if [[ ! -z "${_docker_compose_location}" ]]; then
     local _compose_version="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
     _compose_min_version="1.25.0"
     # --env-file available since docker-compose 1.25.
@@ -51,6 +51,9 @@ function install_docker() {
       sudo rm -rf "${_docker_compose_location}"
       _docker_compose_location=""
     fi
+  elif [[ ! -z $(docker --help | grep -i compose) ]]; then
+    # compose command integrated to common docker command namespace after v2
+    _docker_compose_location="builtin"
   fi
 
   if [[ -z "${_docker_location}" || -z "${_docker_compose_location}" ]]; then
@@ -64,23 +67,37 @@ function install_docker() {
     sudo apt-get -qq update >/dev/null
     sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common net-tools wget mc htop dstat libnss3-tools net-tools >/dev/null #2>&1
     # Add repo docker CE
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     if [[ -f /etc/apt/sources.list.d/docker.list ]]; then
       sudo rm /etc/apt/sources.list.d/docker.list
     fi
-#    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" >/dev/null #2>&1
-#    sudo curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" | sudo apt-key add - >/dev/null      #2>&1
-    #Install docker-ce
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    # previous installation way before new version released, to-do: remove comments later
+    # sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" >/dev/null #2>&1
+    # sudo curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" | sudo apt-key add - >/dev/null      #2>&1
+
+    # Install docker-ce
     sudo apt-get -qq update >/dev/null && sudo apt-get install -y docker-ce docker-ce-cli containerd.io >/dev/null #2>&1
-    #Install last version docker-compose
-    if [[ ! -f /usr/local/bin/docker-compose ]]; then
+    # Install last version docker-compose
+    if [[ -z "$(which docker-compose)" && -z "$(docker --help | grep -i compose)" ]]; then
       docker_compose_version="1.29.2" # latest stable version before experimental compose v2
 #      docker_compose_version=$(curl --silent "https://api.github.com/repos/docker/compose/releases/latest" | jq .name -r)
-      sudo curl -qs -L "https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m)" \
-        -o /usr/local/bin/docker-compose \
-        >/dev/null #2>&1
-      sudo chmod +x /usr/local/bin/docker-compose
+
+      if [[ ! -z $(echo ${docker_compose_version} | grep -E "^v?1") ]]; then
+        sudo curl -qs -L "https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m)" \
+          -o /usr/local/bin/docker-compose
+
+        sudo chmod +x /usr/local/bin/docker-compose
+
+        devbox_state_set_param_value "docker_compose_version" "1"
+      else
+        sudo curl -qs -L "https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m)" \
+          -o /usr/local/lib/docker/cli-plugins/docker-compose
+
+        sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+        devbox_state_set_param_value "docker_compose_version" "2"
+      fi
     fi
     # Set permission
     sudo usermod -a -G docker "${host_user}"
