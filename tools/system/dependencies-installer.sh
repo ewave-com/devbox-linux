@@ -51,7 +51,7 @@ function install_docker() {
       sudo rm -rf "${_docker_compose_location}"
       _docker_compose_location=""
     fi
-  elif [[ ! -z $(docker --help | grep -i compose) ]]; then
+  elif [[ ! -z $(which docker) && ! -z $(docker --help | grep -i compose) ]]; then
     # compose command integrated to common docker command namespace after v2
     _docker_compose_location="builtin"
   fi
@@ -66,10 +66,9 @@ function install_docker() {
     # Install prerequisites to install docker
     sudo apt-get -qq update >/dev/null
     sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common net-tools wget mc htop dstat libnss3-tools net-tools >/dev/null #2>&1
+
     # Add repo docker CE
-    if [[ -f /etc/apt/sources.list.d/docker.list ]]; then
-      sudo rm /etc/apt/sources.list.d/docker.list
-    fi
+    sudo rm -f /etc/apt/sources.list.d/docker.list
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     # previous installation way before new version released, to-do: remove comments later
