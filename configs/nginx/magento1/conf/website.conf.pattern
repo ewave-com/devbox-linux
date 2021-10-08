@@ -1,0 +1,70 @@
+upstream fastcgi_backend {
+	server unix:/var/run/php7-fpm.sock;
+}
+
+map $http_host $mageruncode {
+    {{WEBSITE_HOST_NAME}} default;
+}
+
+server {
+    listen 80 default_server;
+    server_name {{WEBSITE_HOST_NAME}} {{website_extra_host_names_nginx_list}};
+    set $MAGE_ROOT {{WEBSITE_APPLICATION_ROOT}};
+    root $MAGE_ROOT;
+    index index.html index.php;
+
+    client_max_body_size 500M;
+
+    location / {
+        autoindex            off;
+        try_files $uri $uri/ @handler;
+        expires 30d;
+    }
+
+    location /.                      { deny all; }
+    location ^~ /app/                { deny all; }
+    location ^~ /cron.php            { deny all; }
+    location ^~ /cron.sh             { deny all; }
+    location ^~ /dev/                { deny all; }
+    location ^~ /downloader/         { deny all; }
+    location ^~ /errors/local.xml    { deny all; }
+    location ^~ /includes/           { deny all; }
+    location ^~ /lib/                { deny all; }
+    location ~* /media/.*\.(php|pl|py|jsp|asp|sh|cgi)$ { deny all; }
+    location ^~ /media/(.+)\.php     { deny all; }
+    location ^~ /media/customer/     { deny all; }
+    location ^~ /media/downloadable/ { deny all; }
+    location ^~ /pkginfo/            { deny all; }
+    location ^~ /RELEASE_NOTES.txt   { deny all; }
+    location ^~ /report/config.xml   { deny all; }
+    location ^~ /shell/              { deny all; }
+    location ~ /scss/                { deny all; }
+    location ^~ /var/                { deny all; }
+
+    location @handler {
+        rewrite / /index.php;
+    }
+
+    location ~ .php/ {
+        rewrite ^(.*.php)/ $1 last;
+    }
+
+    location ~ .php$ { ## Execute PHP scripts
+        if (!-e $request_filename) { rewrite / /index.php last; }
+
+    expires         off;
+    fastcgi_pass    fastcgi_backend;
+    fastcgi_param   SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+    fastcgi_param   MAGE_IS_DEVELOPER_MODE 1;
+    fastcgi_param   MAGE_RUN_CODE   $mageruncode;
+    fastcgi_param   MAGE_RUN_TYPE   store;
+    include         fastcgi_params;
+    }
+
+    gzip on;
+    gzip_min_length  1000;
+    gzip_proxied any;
+    gzip_types       text/plain application/xml text/css text/js application/x-javascript;
+
+	sendfile off;
+}

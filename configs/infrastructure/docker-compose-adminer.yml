@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+    adminer:
+        image: adminer
+        container_name: adminer
+        restart: on-failure:5
+        ports:
+            - "${ADMINER_PORT}:8080"
+        networks:
+            - docker_projectsubnetwork
+
+networks:
+    docker_projectsubnetwork:
+        external: true

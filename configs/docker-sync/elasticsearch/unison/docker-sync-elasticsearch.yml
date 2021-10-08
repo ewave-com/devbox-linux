@@ -1,0 +1,22 @@
+version: "2"
+
+options:
+    project_root: config_path
+    assign_sync_to_compose_project: {{COMPOSE_PROJECT_NAME}}
+
+syncs:
+    {{PROJECT_NAME}}_{{CONTAINER_ELASTICSEARCH_NAME}}_data_sync:
+        src: '{{DEVBOX_PROJECT_DIR}}/sysdumps/elasticsearch/data'
+        sync_strategy: 'unison'
+        unison_image: {{DOCKER_SYNC_UNISON_IMAGE}}
+        sync_prefer: dest               # prefer container data
+        watch_only: true                # Ewave custom option, skip initial sync expect precopy to run only background watch
+        sync_userid: 1000               # desired userid inside target project container
+        sync_args:
+            - "-perms=0"
+            - "-dontchmod=true"
+            - "-fastcheck=true"
+            - "-maxthreads=100"
+            - "-ignorelocks=true"
+            - "-numericids=false"
+            - "-confirmbigdel=false"

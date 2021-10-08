@@ -1,104 +1,44 @@
 #!/usr/bin/env bash
-set -eu
+set -eu       # Normal working mode
+#set -eux     # Verbose debug mode
 
-source ./tools/main.sh
-source ./tools/install_dependency.sh
-source ./tools/devbox_infrastructure.sh
-source ./tools/env_file.sh
-source ./tools/free_port.sh
-source ./tools/web_platform.sh
-source ./tools/domain.sh
-source ./tools/restart_service.sh
-source ./tools/bash_alias.sh
-source ./tools/fix.sh
-source ./tools/print_info.sh
-
-ssl_check(){
-if [[ -z $WEBSITE_PROTOCOL ]]; then  
-request_ssl
+# 'realpath' might be not installed
+if [[ ! -z "$(which realpath)" ]]; then
+  devbox_root=$(realpath $(dirname "${BASH_SOURCE[0]}"))
 else
-  if [[ $WEBSITE_PROTOCOL = https ]]; then
-  prepare_env ; mysql_free ; ssh_free ; start_infrastructure ; ssl_on
-  else
-  prepare_env ; mysql_free ; ssh_free ; start_infrastructure ; ssl_off
-  fi
+  devbox_root=`dirname "$0"`
+  [[ "${devbox_root}" == "." ]] && devbox_root="${PWD}"
 fi
-}
+export devbox_root
 
-# Function  which add domain and sed variable
-add_domain()(
-prepare_add_domain
-nginx_platform
-php_platform
-)
+# bash version must be 3.0+ for proper work of devbox
+source "${devbox_root}/tools/system/check-bash-version.sh"
 
-auto_start_addimage()(
-redis_platform
-es_platform
-custom_platform
-)
+source "${devbox_root}/tools/system/require-once.sh"
 
-request_ssl(){
-while :
-  do
-  echo "----------------------------------------------"
-  echo -e " * * * * * * * $GREEN SSL  option $SET * * * * * * * * "
-  echo "----------------------------------------------"
-  echo "1)SSL off [prefer]"
-  echo "2)SSL on [You will need change base_url in DB]"
-  echo "----------------------------------------------"
-  echo -n "Enter your menu choice [0-2]:"
-  read request_ssl
-  case $request_ssl in
-    1) prepare_env  ; mysql_free ; ssh_free ; start_infrastructure ; ssl_off ; break ;;
-    2) prepare_env  ; mysql_free ; ssh_free ; start_infrastructure ; ssl_on ; break ;;
-    *) echo "Opps!!! Please select choice 1 or 2"
-       echo "Press a key. . ."
-       read -n 1
-       ;;
-   esac
-done
-}
+require_once "${devbox_root}/tools/system/dependencies-installer.sh"
+require_once "${devbox_root}/tools/main.sh"
+require_once "${devbox_root}/tools/menu/select-project.sh"
 
-docker_architecture(){
-add_domain ; webserver_start ; auto_start_addimage ; sed_ip_port ; start_box 
-}
+cat ${devbox_root}/tools/print/logo.txt
 
-run_devbox(){
-ssl_check ; docker_architecture ; sudo docker exec -it "$PROJECT_NAME"_"$CONTAINER_WEB_NAME" /bin/bash -c "/usr/bin/php $TOOLS_PROVIDER_REMOTE_PATH/$TOOLS_PROVIDER_ENTRYPOINT --autostart" 
-}
+install_dependencies
+update_docker_images_if_required
 
-# Check and install docker
-install_docker
-# Check and install composer
-install_composer
-
+# You can pass project name as argument to start without additional selecting
+selected_project=${1-""}
 # Select folder with project
-list_projects
+if [[ -z "${selected_project}" ]]; then
+  select_project_menu "selected_project"
+fi
 
-# Immediately run fucntion
-set_env
+_no_interaction="0"
+if [[ "${2-''}" == "-n" || "${2-''}" == "--no-interaction" ]]; then
+  _no_interaction="1"
+fi
 
-# Check status project's containers
-count_up_project_containers
+start_docker_if_not_running
 
-# Run devbox
-run_devbox
+start_devbox_project "${selected_project}" "${_no_interaction}"
 
-#final restart
-nginx_reverse_proxy_restart
-
-# Fix Permissions
-fix_permissions
-
-# Add Tools Alias
-addToolsAlias
-
-#final restart
-nginx_reverse_proxy_restart
-
-# Print project info
-print_info
-
-#Unset
-unset_env
+cat ${devbox_root}/tools/print/done.txt

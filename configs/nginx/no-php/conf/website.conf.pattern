@@ -1,0 +1,27 @@
+server {
+    listen      80;
+    server_name {{WEBSITE_HOST_NAME}} {{website_extra_host_names_nginx_list}};
+    root        {{WEBSITE_APPLICATION_ROOT}}/;
+    index       index.php index.html index.htm;
+
+    access_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-access.log;
+    error_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-error.log;
+
+    client_max_body_size 500M;
+
+    types {
+            text/html   html htm shtml php php5;
+    }
+
+    location / {
+        location ~* ^.+\.(jpeg|jpg|png|gif|bmp|ico|svg|css|js)$ {
+            expires     max;
+        }
+    }
+
+    location ~* "/\.(htaccess|htpasswd)$" {
+        deny    all;
+        return  404;
+    }
+
+}

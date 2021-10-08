@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+    redis:
+        image: {{CONTAINER_REDIS_IMAGE}}:{{CONTAINER_REDIS_VERSION}}
+        container_name: {{PROJECT_NAME}}_{{CONTAINER_REDIS_NAME}}
+        restart: unless-stopped
+        networks:
+            - docker_projectsubnetwork
+
+networks:
+    docker_projectsubnetwork:
+        external: true

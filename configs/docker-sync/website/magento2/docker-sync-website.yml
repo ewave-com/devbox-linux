@@ -1,0 +1,39 @@
+version: "2"
+
+options:
+    project_root: config_path
+    assign_sync_to_compose_project: {{COMPOSE_PROJECT_NAME}}
+    # devbox_show_logs_for_syncs - comma-separated syncs list to show their logs
+    devbox_show_logs_for_syncs: {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync
+
+syncs:
+    {{PROJECT_NAME}}_{{CONTAINER_WEB_NAME}}_public_html_sync:
+        src: '{{DEVBOX_PROJECT_DIR}}/public_html'
+        sync_strategy: 'native'         # Linux specific, WinOs / MacOs specific have 'unison' strategy
+        unison_image: {{DOCKER_SYNC_UNISON_IMAGE}}
+        watch_only: true                # Ewave custom option, skip initial sync expect precopy to run only background watch
+        sync_userid: 33                 # desired userid inside target project container
+        sync_args:
+            - "-perms=0"
+            - "-dontchmod=true"
+            - "-fastcheck=true"
+            - "-fastercheckUNSAFE=true"
+            - "-maxthreads=100"
+            - "-ignorelocks=true"
+            - "-numericids=false"
+            - "-confirmbigdel=false"
+        sync_excludes_type: 'none'      # set 'none' explicitly otherwise default type 'Name' will be passed to sync_exclude patterns
+        sync_excludes:
+            - 'Path .idea'
+            - 'Path {{APP_REL_PATH}}var/cache'
+            - 'Path {{APP_REL_PATH}}var/composer_home'
+            - 'Path {{APP_REL_PATH}}var/log'
+            - 'Path {{APP_REL_PATH}}var/view_preprocessed'
+            - 'Path {{APP_REL_PATH}}var/page_cache'
+            - 'Path {{APP_REL_PATH}}var/session'
+            - 'Path {{NODE_MODULES_REL_PATH}}node_modules'
+            - 'Path {{APP_REL_PATH}}var/tmp'
+            - 'Path {{APP_REL_PATH}}pub/static'
+            - 'Path {{APP_REL_PATH}}dev/tests'
+            - 'Path {{APP_REL_PATH}}var/.setup_cronjob_status'
+            - 'Path {{APP_REL_PATH}}var/.update_cronjob_status'

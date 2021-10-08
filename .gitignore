@@ -1,8 +1,9 @@
 *.retry
+devbox.state
+constants-override.sh
 projects/*
 !projects/info.txt
-configs/docker/infrastructure/nginx/
-configs/run
+configs/infrastructure/nginx-reverse-proxy/run
 /vendor/
 composer.lock
 
