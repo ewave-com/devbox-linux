@@ -4,14 +4,14 @@
     "type": "project",
     "version": "3.0.0",
     "require": {
-        "ewave/devbox-core-scripts": "dev-master",
-        "ewave/devbox-m2-scripts": "dev-master",
-        "ewave/devbox-m1-scripts": "dev-master",
-        "ewave/devbox-akeneo2-scripts": "dev-master",
+        "ewave/devbox-core-scripts": "^3.0 | dev-master",
+        "ewave/devbox-m2-scripts": "^3.0 | dev-master",
+        "ewave/devbox-m1-scripts": "^3.0 | dev-master",
+        "ewave/devbox-akeneo2-scripts": "^3.0 | dev-master",
         "psr/container": "<1.1.0"
     },
     "license": "OSL-3.0",
-    "minimum-stability": "beta",
+    "minimum-stability": "stable",
     "repositories": [
         {
             "type": "vcs",
