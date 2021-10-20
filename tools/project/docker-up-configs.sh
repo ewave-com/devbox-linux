@@ -8,8 +8,12 @@ require_once "${devbox_root}/tools/project/project-state.sh"
 ############################ Public functions ############################
 
 function prepare_project_docker_up_configs() {
-  mkdir -p "${project_up_dir}"
-  sudo chmod -R 777 "${project_up_dir}"
+  if [[ ! -d "${project_up_dir}" ]]; then
+    mkdir -p "${project_up_dir}"
+  fi
+  if [[ $(ls -ld "${project_up_dir}" | head -c9) != "drwxrwxrw" ]]; then
+    sudo chmod -R 777 "${project_up_dir}"
+  fi
 
   prepare_website_configs
 
@@ -51,7 +55,9 @@ function prepare_project_docker_up_configs() {
 }
 
 function cleanup_project_docker_up_configs() {
-  sudo chmod -R 777 "${project_up_dir}"
+  if [[ $(ls -ld "${project_up_dir}" | head -c9) != "drwxrwxrw" ]]; then
+    sudo chmod -R 777 "${project_up_dir}"
+  fi
 
   # this wildcard doesn't with rm command
   # rm -rf "${project_up_dir}/docker-compose-.*.yml"

@@ -74,6 +74,10 @@ function nginx_reverse_proxy_add_website_config() {
 
   copy_path "${_website_config_path}" "${devbox_infra_dir}/nginx-reverse-proxy/run/conf.d/"
 
+  if [[ "${os_type}" == "macos" && "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
+    docker cp "${_website_config_path}" nginx-reverse-proxy:/etc/nginx/conf.d/
+  fi
+
   return 0
 }
 
@@ -91,6 +95,11 @@ function nginx_reverse_proxy_remove_website_config() {
 
   if [[ -f "${devbox_infra_dir}/nginx-reverse-proxy/run/conf.d/${_website_config_filename}.conf" ]]; then
     rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/conf.d/${_website_config_filename}.conf"
+  fi
+
+  if [[ "${os_type}" == "macos" && "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
+    docker exec -it nginx-reverse-proxy bash -c "if [[ -f '/etc/nginx/conf.d/${_website_config_filename}' ]]; then rm -rf '/etc/nginx/conf.d/${_website_config_filename}'; fi"
+    docker exec -it nginx-reverse-proxy bash -c "if [[ -f '/etc/nginx/conf.d/${_website_config_filename}.conf' ]]; then rm -rf '/etc/nginx/conf.d/${_website_config_filename}.conf'; fi"
   fi
 }
 
