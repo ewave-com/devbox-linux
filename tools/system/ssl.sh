@@ -21,10 +21,19 @@ function ssl_add_system_certificate() {
 
   if [[ "${os_type}" == "macos" ]]; then
     #how to: https://blog.sleeplessbeastie.eu/2016/11/28/how-to-import-self-signed-certificate-to-macos-system-keychain/
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "${_cert_source_path}"
+    if [[ "${_is_root_ca}" == "1" ]]; then
+      _resultType="trustRoot"
+    else
+      _resultType="trustAsRoot"
+    fi
+    if [[ -z $(security find-certificate -c "${_subject_search_pattern}" -a "/Library/Keychains/System.keychain") ]]; then
+      sudo security add-trusted-cert -d -r "${_resultType}" -k "/Library/Keychains/System.keychain" "${_cert_source_path}"
+    fi
   elif [[ "${os_type}" == "linux" ]]; then
-    sudo cp -r "${_cert_source_path}" "/usr/local/share/ca-certificates/"
-    sudo update-ca-certificates --fresh >/dev/null
+    if [[ ! -f "/usr/local/share/ca-certificates/$(basename ${_cert_source_path})" ]]; then
+      sudo cp -r "${_cert_source_path}" "/usr/local/share/ca-certificates/"
+      sudo update-ca-certificates --fresh >/dev/null
+    fi
   fi
 }
 
@@ -40,10 +49,14 @@ function ssl_delete_system_certificate() {
 
   if [[ "${os_type}" == "macos" ]]; then
     #how to: https://unix.stackexchange.com/questions/227009/osx-delete-all-matching-certificates-by-command-line
-    security find-certificate -c "${_cert_source_path}" -a -Z | sudo awk '/SHA-1/{system("security delete-certificate -Z "$NF)}' >/dev/null
+    if [[ ! -z $(security find-certificate -c "${_subject_search_pattern}" -a "/Library/Keychains/System.keychain") ]]; then
+      security find-certificate -c "${_subject_search_pattern}" -a -Z "/Library/Keychains/System.keychain" | sudo awk '/SHA-1/{system("security delete-certificate -Z "$NF)}' >/dev/null
+    fi
   elif [[ "${os_type}" == "linux" ]]; then
-    sudo rm -rf "/usr/local/share/ca-certificates/${_cert_source_path}" >/dev/null
-    sudo update-ca-certificates --fresh >/dev/null
+    if [[ -f "/usr/local/share/ca-certificates/${_cert_source_path}" ]]; then
+      sudo rm -rf "/usr/local/share/ca-certificates/${_cert_source_path}" >/dev/null
+      sudo update-ca-certificates --fresh >/dev/null
+    fi
   fi
 }
 
@@ -74,7 +87,7 @@ function ssl_generate_root_certificate_authority() {
       -newkey rsa:2048 \
       -keyout /tmp/DevboxRootCA/${_cert_basename}.key \
       -out /tmp/DevboxRootCA/${_cert_basename}.pem \
-      -subj /C=BY/ST=Minsk/L=Minsk/O=EwaveDevOpsTeam_Devbox/ \
+      -subj /C=BY/ST=Minsk/L=Minsk/O=EwaveDevOpsTeam_Devbox/CN=DevboxRootCA/ \
       >/dev/null 2>&1 && \
       openssl x509 -outform pem -in /tmp/DevboxRootCA/${_cert_basename}.pem -out /tmp/DevboxRootCA/${_cert_basename}.crt \
       >/dev/null 2>&1"
