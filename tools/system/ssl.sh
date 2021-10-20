@@ -4,16 +4,47 @@ require_once "${devbox_root}/tools/system/output.sh"
 
 ############################ Public functions ############################
 
-function ssl_import_new_system_certificate() {
+function ssl_add_system_certificate() {
   local _cert_source_path=$1
+  local _subject_search_pattern=${2-''}
+  local _is_root_ca=${3-'0'}
 
-  add_system_ssl_certificate "${_cert_source_path}"
+  if [[ -z "${_cert_source_path}" ]]; then
+    show_error_message "Unable to add CA certificate. Filename cannot be empty."
+    exit 1
+  fi
+
+  if [[ ! -f "${_cert_source_path}" ]]; then
+    show_error_message "Unable to add CA certificate. Cert file does not exist at path '${_cert_source_path}'."
+    exit 1
+  fi
+
+  if [[ "${os_type}" == "macos" ]]; then
+    #how to: https://blog.sleeplessbeastie.eu/2016/11/28/how-to-import-self-signed-certificate-to-macos-system-keychain/
+    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "${_cert_source_path}"
+  elif [[ "${os_type}" == "linux" ]]; then
+    sudo cp -r "${_cert_source_path}" "/usr/local/share/ca-certificates/"
+    sudo update-ca-certificates --fresh >/dev/null
+  fi
 }
 
-function ssl_disable_system_certificate() {
+function ssl_delete_system_certificate() {
   local _cert_source_path=$1
+  local _subject_search_pattern=${2-''}
+  local _is_root_ca=${3-'0'}
 
-  ssl_remove_system_certificate "${_cert_source_path}"
+  if [[ -z ${_cert_source_path} ]]; then
+    show_error_message "Unable to remove CA certificate. Filename cannot be empty."
+    exit 1
+  fi
+
+  if [[ "${os_type}" == "macos" ]]; then
+    #how to: https://unix.stackexchange.com/questions/227009/osx-delete-all-matching-certificates-by-command-line
+    security find-certificate -c "${_cert_source_path}" -a -Z | sudo awk '/SHA-1/{system("security delete-certificate -Z "$NF)}' >/dev/null
+  elif [[ "${os_type}" == "linux" ]]; then
+    sudo rm -rf "/usr/local/share/ca-certificates/${_cert_source_path}" >/dev/null
+    sudo update-ca-certificates --fresh >/dev/null
+  fi
 }
 
 function ssl_generate_root_certificate_authority() {
@@ -157,46 +188,3 @@ function ssl_generate_domain_certificate() {
 }
 
 ############################ Public functions end ############################
-
-############################ Local functions ############################
-
-function add_system_ssl_certificate() {
-  local _cert_source_path=$1
-
-  if [[ -z "${_cert_source_path}" ]]; then
-    show_error_message "Unable to add CA certificate. Filename cannot be empty."
-    exit 1
-  fi
-
-  if [[ ! -f "${_cert_source_path}" ]]; then
-    show_error_message "Unable to add CA certificate. Cert file does not exist at path '${_cert_source_path}'."
-    exit 1
-  fi
-
-  if [[ "${os_type}" == "macos" ]]; then
-    #how to: https://blog.sleeplessbeastie.eu/2016/11/28/how-to-import-self-signed-certificate-to-macos-system-keychain/
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "${_cert_source_path}"
-  elif [[ "${os_type}" == "linux" ]]; then
-    sudo cp -r "${_cert_source_path}" "/usr/local/share/ca-certificates/"
-    sudo update-ca-certificates --fresh >/dev/null
-  fi
-}
-
-function ssl_remove_system_certificate() {
-  local _file_name=$1
-
-  if [[ -z ${_file_name} ]]; then
-    show_error_message "Unable to remove CA certificate. Filename cannot be empty."
-    exit 1
-  fi
-
-  if [[ "${os_type}" == "macos" ]]; then
-    #how to: https://unix.stackexchange.com/questions/227009/osx-delete-all-matching-certificates-by-command-line
-    security find-certificate -c "${_file_name}" -a -Z | sudo awk '/SHA-1/{system("security delete-certificate -Z "$NF)}' >/dev/null
-  elif [[ "${os_type}" == "linux" ]]; then
-    sudo rm -rf "/usr/local/share/ca-certificates/${_file_name}" >/dev/null
-    sudo update-ca-certificates --fresh >/dev/null
-  fi
-}
-
-############################ Local functions end ############################
