@@ -1171,10 +1171,10 @@ The handler of common system operations with SSL certificates.
 
 #### Public functions:
 
-``` ssl_import_new_system_certificate([string]$_cert_source_path): void```
+``` ssl_add_system_certificate([string]$_cert_source_path, [string]$_subject_search_pattern, [bool]$is_root_ca = $false): void```
 Import the new certificate file.
 
-``` ssl_disable_system_certificate([string]$_cert_source_path): void```
+``` ssl_delete_system_certificate([string]$_cert_source_path, [string]$_subject_search_pattern, [bool]$is_root_ca = $false): void```
 Deactivate the certificate file.
 
 ``` ssl_generate_root_certificate_authority([string]$_target_root_crt_path, [string]$_target_root_key_path): void```
@@ -1183,10 +1183,7 @@ Generate DevBox Root CA to sign generated project certificates
 ``` ssl_generate_domain_certificate([string]$_website_namem, [string]$_extra_domains = "", [string]$_target_crt_path, [string]$_target_key_path = "", [string]$_root_ca_pem_path, [string]$_root_ca_key_path = ""): void```
 Generate certificate files for the domain using openssl system package. Certificate will be signed by the given root_ca, so it is required as well.
 
-#### Local functions:
+#### Local functions: -
 
-``` add_system_ssl_certificate([string]$_cert_source_path): void```
-Add SSL certificate to the system storage.
 
-``` ssl_remove_system_certificate([string]$_file_name): void```
-Remove SSL certificate from the the system storage.
+
