@@ -73,6 +73,7 @@ function stop_infrastructure() {
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/"*
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
     if [[ "${os_type}" == "macos" ]]; then
+      docker exec -it nginx-reverse-proxy bash -c "rm -rf /etc/nginx/conf.d/*"
       # some containers might hang with Docker for Mac due to stopsignal inconsistencies inside docker, so use added compose timeout
       # Error: UnixHTTPConnectionPool(host='localhost', port=None): Read timed out.
       # As a workaround the only 2 solutions will work: restart docker every time, or downgrade to 2.* version and wait for fix...
@@ -137,6 +138,7 @@ function down_infrastructure() {
   rm -rf "${devbox_infra_dir}/nginx-reverse-proxy/run/logs/"*
   if [[ "$(is_docker_container_running 'nginx-reverse-proxy')" == "1" ]]; then
     if [[ "${os_type}" == "macos" ]]; then
+      docker exec -it nginx-reverse-proxy bash -c "rm -rf /etc/nginx/conf.d/*"
       # see comment here in the stop_infrastructure function
       set +e
       docker_compose_down "${devbox_infra_dir}/docker-compose-nginx-reverse-proxy.yml" "${_dotenv_filepath}"

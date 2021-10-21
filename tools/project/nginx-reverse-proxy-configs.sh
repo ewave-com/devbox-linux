@@ -42,6 +42,7 @@ function prepare_project_nginx_reverse_proxy_configs() {
   if [[ "${WEBSITE_PROTOCOL}" == 'https' ]]; then
     # find or generate certificate in ${project_up_dir}/configs/ssl
     prepare_website_ssl_certificate
+    ssl_add_system_certificate "${project_up_dir}/configs/ssl/${WEBSITE_SSL_CERT_FILENAME}.crt" "${WEBSITE_HOST_NAME}"
 
     nginx_reverse_proxy_add_website "${_nginx_proxy_config_filepath}" "${project_up_dir}/configs/ssl/${WEBSITE_SSL_CERT_FILENAME}.crt"
   fi
@@ -58,7 +59,7 @@ function cleanup_project_nginx_reverse_proxy_configs() {
   if [[ "${WEBSITE_PROTOCOL}" == 'https' ]]; then
     if [[ "${_full_clean}" == "1" ]]; then
       nginx_reverse_proxy_remove_project_website "${WEBSITE_HOST_NAME}" "${WEBSITE_SSL_CERT_FILENAME}.crt"
-      ssl_disable_system_certificate "${WEBSITE_SSL_CERT_FILENAME}.crt"
+      ssl_delete_system_certificate "${WEBSITE_SSL_CERT_FILENAME}.crt" "${WEBSITE_HOST_NAME}"
     else
       nginx_reverse_proxy_remove_project_website "${WEBSITE_HOST_NAME}"
     fi
@@ -79,7 +80,7 @@ function prepare_website_ssl_certificate() {
     _ssl_dir="${devbox_infra_dir}/nginx-reverse-proxy/run/ssl"
     if [[ ! -f "${_ssl_dir}/DevboxRootCA.crt" || ! -f "${_ssl_dir}/DevboxRootCA.pem" || ! -f "${_ssl_dir}/DevboxRootCA.key" ]]; then
       ssl_generate_root_certificate_authority "${_ssl_dir}/DevboxRootCA.crt"
-      ssl_import_new_system_certificate "${_ssl_dir}/DevboxRootCA.crt"
+      ssl_add_system_certificate "${_ssl_dir}/DevboxRootCA.crt" "DevboxRootCA" "1"
 
       show_success_message "Devbox Root CA has been generated and imported to your system."
       show_warning_message "If you still see the warning about insecure connection in your browser please import the certificate authority to your browser. "
