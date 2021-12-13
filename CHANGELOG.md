@@ -1,6 +1,9 @@
 # Linux DevBox
 http://devbox.ewave.com/
 
+## Release 3.0.2
+- [Linux/MacOs] Added compatibility with Docker 4.2 and 4.3. As a result log-level option has been removed from 'docker compose' V2 commands due to docker parsing issue.
+
 ## Release 3.0.1
 - [Linux/MacOs] Fixed repeated import of website SSL certificate which resulted in asking for admin privileges by every project starting/stopping with enabled HTTPS
 - [Linux/MacOs] Reduced requesting of sudo commands. You can allow netstat without password using visudo to avoid password requesting for regular work with project (start/stop). 
