@@ -7,11 +7,11 @@ server {
 }
 
 server {
-    listen 443;
+    listen 443 ssl;
     server_name {{WEBSITE_HOST_NAME}} {{website_extra_host_names_nginx_list}};
 
     # SSL Section
-    ssl on;
+    # ssl on;
 
     ssl_certificate /etc/nginx/ssl/{{WEBSITE_SSL_CERT_FILENAME}}.crt;
     ssl_certificate_key /etc/nginx/ssl/{{WEBSITE_SSL_CERT_FILENAME}}.key;
@@ -20,7 +20,7 @@ server {
     error_log /var/log/nginx/{{WEBSITE_HOST_NAME}}-error.log;
 
     ### SSL START SECTION ###
-#    ssl on;
+    # ssl on;
 
     ssl_session_timeout 5m;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2; #Bad Protocols Should Be Disabled
