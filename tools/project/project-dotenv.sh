@@ -164,6 +164,18 @@ function ensure_exposed_container_ports_are_available() {
     fi
   fi
 
+  # ensure rabbitmq external port is available to be exposed or compute a free one
+  local _rabbitmq_enable
+  _rabbitmq_enable=$(dotenv_get_param_value 'RABBITMQ_ENABLE')
+  if [[ "${_rabbitmq_enable}" == "yes" ]]; then
+    local _configured_rabbitmq_port
+    _configured_rabbitmq_port=$(dotenv_get_param_value 'CONTAINER_RABBITMQ_PORT')
+    if [[ -n ${_configured_rabbitmq_port} ]]; then
+      local _rabbitmq_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_RABBITMQ_NAME')"
+      ensure_rabbitmq_port_is_available "${_configured_rabbitmq_port}" "${_rabbitmq_container_name}"
+    fi
+  fi
+
   # ensure website ssh external port is available to be exposed or compute a free one
   local _configured_ssh_port
   _configured_ssh_port=$(dotenv_get_param_value 'CONTAINER_WEB_SSH_PORT')
@@ -234,6 +246,33 @@ function add_computed_params() {
       fi
 
       dotenv_set_param_value 'CONTAINER_ELASTICSEARCH_PORT' "${_computed_es_port}"
+    fi
+  fi
+
+  # ensure rabbitmq external port is available to be exposed or compute a free one
+  local _rabbitmq_enable
+  _rabbitmq_enable=$(dotenv_get_param_value 'RABBITMQ_ENABLE')
+  if [[ "${_rabbitmq_enable}" == "yes" ]]; then
+    local _rabbitmq_container_name
+    _rabbitmq_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_RABBITMQ_NAME')"
+    local _configured_rabbitmq_port
+    _configured_rabbitmq_port=$(dotenv_get_param_value 'CONTAINER_RABBITMQ_PORT')
+    if [[ -n ${_configured_rabbitmq_port} ]]; then
+      ensure_rabbitmq_port_is_available "${_configured_rabbitmq_port}" "${_rabbitmq_container_name}"
+    else
+      local _computed_rabbitmq_port
+      local _rabbitmq_container_state
+      _rabbitmq_container_state=$(get_docker_container_state "${_rabbitmq_container_name}")
+      if [[ ! -z "${_rabbitmq_container_state}" ]]; then
+        _computed_rabbitmq_port=$(get_rabbitmq_port_from_existing_container "${_rabbitmq_container_name}")
+        if [[ "${_rabbitmq_container_state}" != "running" ]]; then
+          ensure_rabbitmq_port_is_available "${_computed_rabbitmq_port}" "${_rabbitmq_container_name}"
+        fi
+      else
+        _computed_rabbitmq_port=$(get_available_rabbitmq_port)
+      fi
+
+      dotenv_set_param_value 'CONTAINER_RABBITMQ_PORT' "${_computed_rabbitmq_port}"
     fi
   fi
 
