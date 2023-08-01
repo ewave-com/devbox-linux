@@ -100,9 +100,9 @@ function stop_infrastructure() {
     fi
   fi
 
-  if [[ "$(is_docker_container_running 'portainer')" == "1" ]]; then
-    docker_compose_down "${devbox_infra_dir}/docker-compose-portainer.yml" "${_dotenv_filepath}"
-  fi
+  # if [[ "$(is_docker_container_running 'portainer')" == "1" ]]; then
+  #   docker_compose_down "${devbox_infra_dir}/docker-compose-portainer.yml" "${_dotenv_filepath}"
+  # fi
 }
 
 # Down infrastructure docker services
