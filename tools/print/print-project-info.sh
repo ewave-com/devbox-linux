@@ -67,6 +67,8 @@ function print_info() {
     show_message "[ RABBITMQ ]"
     show_message ""
     show_info_value_message "RabbitMQ Host" "${PROJECT_NAME}_${CONTAINER_RABBITMQ_NAME}"
+    show_info_value_message "RabbitMQ Port" "${CONTAINER_RABBITMQ_PORT}"
+    show_info_value_message "RabbitMQ URL" "http://${MACHINE_IP_ADDRESS}:1${CONTAINER_RABBITMQ_PORT}/"
   fi
 
   show_message ""

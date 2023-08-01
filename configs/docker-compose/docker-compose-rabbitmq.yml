@@ -6,10 +6,10 @@ services:
         container_name: {{PROJECT_NAME}}_{{CONTAINER_RABBITMQ_NAME}}
         restart: unless-stopped
         ports:
-            - "15672:15672"
-            - "5672:5672"
+            - "1{{CONTAINER_RABBITMQ_PORT}}:15672"
+            - "{{CONTAINER_RABBITMQ_PORT}}:5672"
         volumes:
-            - ./configs/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+            - ./configs/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
         networks:
             - docker_projectsubnetwork
 
