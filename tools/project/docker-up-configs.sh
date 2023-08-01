@@ -29,6 +29,10 @@ function prepare_project_docker_up_configs() {
     prepare_elasticsearch_configs
   fi
 
+  if [[ ${OPENSEARCH_ENABLE} == yes ]]; then
+    prepare_opensearch_configs
+  fi
+
   if [[ ${REDIS_ENABLE} == yes ]]; then
     prepare_redis_configs
   fi
@@ -226,6 +230,21 @@ function prepare_elasticsearch_configs() {
   if [[ -n "${CONFIGS_PROVIDER_ELASTICSEARCH}" ]]; then
     copy_path_with_project_fallback "configs/elasticsearch/${CONFIGS_PROVIDER_ELASTICSEARCH}/" "${project_up_dir}/configs/elasticsearch/" "0"
     replace_directory_files_patterns_with_dotenv_params "${project_up_dir}/configs/elasticsearch/" "${project_up_dir}/.env"
+  fi
+}
+
+function prepare_opensearch_configs() {
+  copy_path_with_project_fallback "configs/docker-compose/docker-compose-opensearch.yml" "${project_up_dir}/docker-compose-opensearch.yml"
+  replace_file_patterns_with_dotenv_params "${project_up_dir}/docker-compose-opensearch.yml" "${project_up_dir}/.env"
+
+  if [[ -n "${CONFIGS_PROVIDER_OPENSEARCH_DOCKER_SYNC}" ]]; then
+    copy_path_with_project_fallback "configs/docker-sync/opensearch/${CONFIGS_PROVIDER_OPENSEARCH_DOCKER_SYNC}/docker-sync-opensearch.yml" "${project_up_dir}/docker-sync-opensearch.yml"
+    replace_file_patterns_with_dotenv_params "${project_up_dir}/docker-sync-opensearch.yml" "${project_up_dir}/.env"
+  fi
+
+  if [[ -n "${CONFIGS_PROVIDER_OPENSEARCH}" ]]; then
+    copy_path_with_project_fallback "configs/opensearch/${CONFIGS_PROVIDER_OPENSEARCH}/" "${project_up_dir}/configs/opensearch/" "0"
+    replace_directory_files_patterns_with_dotenv_params "${project_up_dir}/configs/opensearch/" "${project_up_dir}/.env"
   fi
 }
 

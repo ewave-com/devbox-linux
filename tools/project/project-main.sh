@@ -297,6 +297,10 @@ function create_base_project_dirs() {
     mkdir -p "${project_dir}/sysdumps/elasticsearch/data"
   fi
 
+  if [[ ${OPENSEARCH_ENABLE} == yes && ! -d "${project_dir}/sysdumps/opensearch/data" ]]; then
+    mkdir -p "${project_dir}/sysdumps/opensearch/data"
+  fi
+
   # backward compatibility ont-time moves, will be removed later
   # "db/", "es/", "node_modules/" directories were moved into "sysdumps/" dir in within project dir
   if [[ -d "${project_dir}/db/" && (! -d "${project_dir}/sysdumps/mysql/" || ! $(ls -a "${project_dir}/sysdumps/mysql/")) ]]; then

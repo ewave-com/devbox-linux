@@ -1,0 +1,10 @@
+version: "2"
+
+options:
+    project_root: config_path
+    assign_sync_to_compose_project: {{COMPOSE_PROJECT_NAME}}
+
+syncs:
+    {{PROJECT_NAME}}_{{CONTAINER_OPENSEARCH_NAME}}_data_sync:
+        src: '{{DEVBOX_PROJECT_DIR}}/sysdumps/opensearch/data'
+        sync_strategy: 'native'
