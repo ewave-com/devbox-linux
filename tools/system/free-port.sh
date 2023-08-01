@@ -125,6 +125,66 @@ function ensure_elasticsearch_port_is_available() {
   fi
 }
 
+# Function which find free port for rabbitmq service
+function get_available_rabbitmq_port() {
+  local _containers_port
+  local _netstat_port
+
+  _containers_port=$(find_port_across_docker_containers "56[0-9]{2}")
+  _netstat_port=$(find_port_by_regex "56[0-9]{2}")
+
+  local _result_port
+  if [[ -z "${_netstat_port}" && -z "${_containers_port}" ]]; then
+    _result_port=5672
+  else
+    # find highest port across docker containers ports and netstat ports by mask and allocate the next one
+    _result_port=$(($(printf '%s\n' "${_containers_port}" "${_netstat_port}" | sort -g -r | head -n 1) + 1))
+  fi
+
+  echo "${_result_port}"
+}
+
+function get_rabbitmq_port_from_existing_container() {
+  local _container_name=${1-""}
+
+  if [[ -z ${_container_name} ]]; then
+    show_error_message "Unable to check rabbitmq port from existing container. Container name cannot be empty"
+    exit 1
+  fi
+
+  local _container_port
+  _container_port=$(find_port_across_docker_containers "56[0-9]{2}" "${_container_name}")
+
+  echo "${_container_port}"
+}
+
+# Function which checks if rabbitmq port is available to be exposed
+function ensure_rabbitmq_port_is_available() {
+  local _checked_port=${1-""}
+  local _container_name=${2-""}
+  if [[ -z ${_checked_port} ]]; then
+    show_error_message "Unable to check rabbitmq port. Port number argument cannot be empty"
+    exit 1
+  fi
+
+  local _used_port
+  _used_port=$(find_port_by_regex "${_checked_port}")
+  if [[ "${_checked_port}" == "${_used_port}" ]]; then
+    _process_info=$(get_process_info_by_allocated_port ${_checked_port})
+    # if container name given then skip error if the checked allocated port belongs to the same container
+    if [[ -z "${_container_name}" || -z $(echo ${_process_info} | grep "${_container_name}") ]]; then
+      show_error_message "RabbitMQ port ${_checked_port} is already allocated by process ${_process_info}"
+      show_error_message "Please free the port, set port CONTAINER_RABBITMQ_PORT to another value of set it empty for autocompleting in '${project_dir}/.env' file"
+      exit 1
+    fi
+  fi
+
+  if [[ "${_checked_port}" < "5600" || "${_checked_port}" > "5699" ]]; then
+    show_error_message "RabbitMQ port must be configured in range 5600-5699. Value '${_checked_port}' given. Please update value in your '${project_dir}/.env' file."
+    exit 1
+  fi
+}
+
 # Function which find free ssh port for website
 function get_available_website_ssh_port() {
   local _containers_port
