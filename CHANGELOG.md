@@ -2,6 +2,7 @@
 http://devbox.ewave.com/
 
 ## Release 3.1.0
+- Added OpenSearch support
 - Added CONTAINER_RABBITMQ_PORT env settings to specify port for RabbitMQ container
 - Removed Portainer container stop when running the "Stop ALL projects" 
 
