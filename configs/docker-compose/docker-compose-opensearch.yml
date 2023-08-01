@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+    es:
+        image: {{CONTAINER_OPENSEARCH_IMAGE}}:{{CONTAINER_OPENSEARCH_VERSION}}
+        container_name: {{PROJECT_NAME}}_{{CONTAINER_OPENSEARCH_NAME}}
+        restart: unless-stopped
+        ports:
+            - "{{CONTAINER_OPENSEARCH_PORT}}:9200"
+        environment:
+            - cluster.name=webserver_default
+            - bootstrap.memory_lock=false # along with the memlock settings below, disables swapping
+            - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+            - "DISABLE_INSTALL_DEMO_CONFIG=true" # disables execution of install_demo_configuration.sh bundled with security plugin, which installs demo certificates and security configurations to OpenSearch
+            - "DISABLE_SECURITY_PLUGIN=true" # disables security plugin entirely in OpenSearch by setting plugins.security.disabled: true in opensearch.yml
+            - "discovery.type=single-node" # disables bootstrap checks that are enabled when network.host is set to a non-loopback address
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+            nofile:
+                soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
+                hard: 65536
+        volumes:
+            - {{PROJECT_NAME}}_{{CONTAINER_OPENSEARCH_NAME}}_data_sync:/usr/share/opensearch/data
+        networks:
+            - docker_projectsubnetwork
+
+volumes:
+      {{PROJECT_NAME}}_{{CONTAINER_OPENSEARCH_NAME}}_data_sync:
+          external: true
+
+networks:
+    docker_projectsubnetwork:
+        external: true

@@ -40,6 +40,14 @@ function print_info() {
     show_info_value_message "ElasticSearch Port" "${CONTAINER_ELASTICSEARCH_PORT}"
   fi
 
+  if [[ "${OPENSEARCH_ENABLE}" == "yes" ]]; then
+    show_message ""
+    show_message "[ OPENSEARCH ]"
+    show_message ""
+    show_info_value_message "OpenSearch Host" "${PROJECT_NAME}_${CONTAINER_OPENSEARCH_NAME}"
+    show_info_value_message "OpenSearch Port" "${CONTAINER_OPENSEARCH_PORT}"
+  fi
+
   if [[ "${MONGODB_ENABLE}" == "yes" ]]; then
     show_message ""
     show_message "[ MONGODB ]"

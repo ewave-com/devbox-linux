@@ -164,6 +164,18 @@ function ensure_exposed_container_ports_are_available() {
     fi
   fi
 
+  # ensure opensearch external port is available to be exposed or compute a free one
+  local _opensearch_enable
+  _opensearch_enable=$(dotenv_get_param_value 'OPENSEARCH_ENABLE')
+  if [[ "${_opensearch_enable}" == "yes" ]]; then
+    local _configured_opensearch_port
+    _configured_opensearch_port=$(dotenv_get_param_value 'CONTAINER_OPENSEARCH_PORT')
+    if [[ -n ${_configured_opensearch_port} ]]; then
+      local _opensearch_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_OPENSEARCH_NAME')"
+      ensure_opensearch_port_is_available "${_configured_opensearch_port}" "${_opensearch_container_name}"
+    fi
+  fi
+
   # ensure website ssh external port is available to be exposed or compute a free one
   local _configured_ssh_port
   _configured_ssh_port=$(dotenv_get_param_value 'CONTAINER_WEB_SSH_PORT')
@@ -237,6 +249,34 @@ function add_computed_params() {
     fi
   fi
 
+  # ensure opensearch external port is available to be exposed or compute a free one
+  local _opensearch_enable
+  _opensearch_enable=$(dotenv_get_param_value 'OPENSEARCH_ENABLE')
+  if [[ "${_opensearch_enable}" == "yes" ]]; then
+    local _opensearch_container_name
+    _opensearch_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_OPENSEARCH_NAME')"
+    local _configured_opensearch_port
+    _configured_opensearch_port=$(dotenv_get_param_value 'CONTAINER_OPENSEARCH_PORT')
+
+    if [[ -n ${_configured_opensearch_port} ]]; then
+      ensure_opensearch_port_is_available "${_configured_opensearch_port}" "${_opensearch_container_name}"
+    else
+      local _computed_opensearch_port
+      local _opensearch_container_state
+      _opensearch_container_state=$(get_docker_container_state "${_opensearch_container_name}")
+      if [[ ! -z "${_opensearch_container_state}" ]]; then
+        _computed_opensearch_port=$(get_opensearch_port_from_existing_container "${_opensearch_container_name}")
+        if [[ "${_opensearch_container_state}" != "running" ]]; then
+          ensure_opensearch_port_is_available "${_computed_opensearch_port}" "${_opensearch_container_name}"
+        fi
+      else
+        _computed_opensearch_port=$(get_available_opensearch_port)
+      fi
+
+      dotenv_set_param_value 'CONTAINER_OPENSEARCH_PORT' "${_computed_opensearch_port}"
+    fi
+  fi
+
   # ensure website ssh external port is available to be exposed or compute a free one
   local _web_container_name
   _web_container_name="${_project_name}_$(dotenv_get_param_value 'CONTAINER_WEB_NAME')"
@@ -299,6 +339,18 @@ function add_computed_params() {
       _es_docker_sync_provider="native"
     fi
     dotenv_set_param_value 'CONFIGS_PROVIDER_ELASTICSEARCH_DOCKER_SYNC' "${_es_docker_sync_provider}"
+  fi
+
+  # set OS opensearch docker-sync type if 'default' chosen
+  local _opensearch_docker_sync_provider
+  _opensearch_docker_sync_provider=$(dotenv_get_param_value 'CONFIGS_PROVIDER_OPENSEARCH_DOCKER_SYNC')
+  if [[ "${_opensearch_docker_sync_provider}" == "default" ]]; then
+    if [[ "${os_type}" == "macos" ]]; then
+      _opensearch_docker_sync_provider="native"
+    elif [[ "${os_type}" == "linux" ]]; then
+      _opensearch_docker_sync_provider="native"
+    fi
+    dotenv_set_param_value 'CONFIGS_PROVIDER_OPENSEARCH_DOCKER_SYNC' "${_opensearch_docker_sync_provider}"
   fi
 }
 

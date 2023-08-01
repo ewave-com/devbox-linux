@@ -648,6 +648,10 @@ Prepare Varnish main file 'docker-up/docker-compose-varnish.yml' config and also
 Prepare Elasticsearch main files 'docker-up/docker-compose-elasticsearch.yml' and 'docker-up/docker-sync-elasticsearch.yml' config
 and also related configs into 'docker-up/configs/elasticsearch/*'.
 
+``` prepare_opensearch_configs(): void```
+Prepare OpenSearch main files 'docker-up/docker-compose-opensearch.yml' and 'docker-up/docker-sync-opensearch.yml' config
+and also related configs into 'docker-up/configs/opensearch/*'.
+
 ``` prepare_redis_configs(): void```
 Prepare Redis main file 'docker-up/docker-compose-redis.yml' config and also related configs into 'docker-up/configs/redis/*'.
 
