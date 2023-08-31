@@ -648,6 +648,10 @@ Prepare Varnish main file 'docker-up/docker-compose-varnish.yml' config and also
 Prepare Elasticsearch main files 'docker-up/docker-compose-elasticsearch.yml' and 'docker-up/docker-sync-elasticsearch.yml' config
 and also related configs into 'docker-up/configs/elasticsearch/*'.
 
+``` prepare_opensearch_configs(): void```
+Prepare OpenSearch main files 'docker-up/docker-compose-opensearch.yml' and 'docker-up/docker-sync-opensearch.yml' config
+and also related configs into 'docker-up/configs/opensearch/*'.
+
 ``` prepare_redis_configs(): void```
 Prepare Redis main file 'docker-up/docker-compose-redis.yml' config and also related configs into 'docker-up/configs/redis/*'.
 
@@ -1040,6 +1044,16 @@ Retrieve assigned Elasticsearch port from metadata of already existing container
 
 ``` ensure_elasticsearch_port_is_available([string]$_checked_port, [string]$_container_name = ''): void```
 Ensure static Elasticsearch port is available to be allocated before usage. Otherwise, throw an error.
+If container name presented and busy port belongs to the given $_container_name - omit error and continue.
+
+``` get_available_rabbitmq_port(): string```
+Evaluate next free port for RabbitMQ container based on system ports info and existing container port info starting from default port 9200.
+
+``` get_rabbitmq_port_from_existing_container([string]$_container_name): string```
+Retrieve assigned RabbitMQ port from metadata of already existing container.
+
+``` ensure_rabbitmq_port_is_available([string]$_checked_port, [string]$_container_name = ''): void```
+Ensure static RabbitMQ port is available to be allocated before usage. Otherwise, throw an error.
 If container name presented and busy port belongs to the given $_container_name - omit error and continue.
 
 ``` get_available_website_ssh_port(): string```
