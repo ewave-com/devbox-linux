@@ -16,6 +16,7 @@ services:
             - ./configs/mysql/conf.d/custom.cnf:/etc/mysql/conf.d/custom.cnf
         networks:
             - docker_projectsubnetwork
+        user: mysql
 
 volumes:
     {{PROJECT_NAME}}_{{CONTAINER_MYSQL_NAME}}_data_sync:
